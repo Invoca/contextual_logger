@@ -1,19 +1,18 @@
 # frozen_string literal: true
 
-require 'contextual_logging/context'
 require 'json'
 
 module ContextualLogging
   def with_context(context)
-    previous_context = Thread[THREAD_CONTEXT_NAMESPACE]
-    Thread[THREAD_CONTEXT_NAMESPACE] = context
+    previous_context = Thread.current[THREAD_CONTEXT_NAMESPACE]
+    Thread.current[THREAD_CONTEXT_NAMESPACE] = context
     yield if block_given?
   ensure
-    Thread[THREAD_CONTEXT_NAMESPACE] = previous_context
+    Thread.current[THREAD_CONTEXT_NAMESPACE] = previous_context
   end
 
   def current_context_for_thread
-    Thread[THREAD_CONTEXT_NAMESPACE] || {}
+    Thread.current[THREAD_CONTEXT_NAMESPACE] || {}
   end
 
   def format_message(severity, timestamp, progname, message, context)
@@ -31,7 +30,7 @@ module ContextualLogging
     end
   end
 
-  def info(progname = nil, *extra_context, &block)
+  def info(progname = nil, **extra_context, &block)
     add(Logger::Severity::INFO, nil, progname, extra_context, &block)
   end
 
