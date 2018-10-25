@@ -24,7 +24,7 @@ module ContextualLogging
     )
 
     if @formatter
-      @formatter.call(message_with_context)
+      @formatter.call(severity, timestamp, progname, message_with_context)
     else
       "#{message_with_context.to_json}\n"
     end
