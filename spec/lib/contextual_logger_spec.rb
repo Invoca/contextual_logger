@@ -2,10 +2,10 @@
 
 require 'spec_helper'
 require 'logger'
-require 'contextual_logging'
+require 'contextual_logger'
 
 class DummyLogger < Logger
-  include ContextualLogging
+  include ContextualLogger
 end
 
 describe 'ContextualLogging' do

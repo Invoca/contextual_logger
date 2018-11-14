@@ -2,7 +2,7 @@
 
 require 'json'
 
-module ContextualLogging
+module ContextualLogger
   def with_context(context)
     previous_context = Thread.current[THREAD_CONTEXT_NAMESPACE]
     Thread.current[THREAD_CONTEXT_NAMESPACE] = context

@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    contextual_logging (0.1.0)
+    contextual_logger (0.1.0)
       json
 
 GEM
@@ -67,7 +67,7 @@ PLATFORMS
 
 DEPENDENCIES
   bump (~> 0.6.1)
-  contextual_logging!
+  contextual_logger!
   pry
   rspec
   rspec_junit_formatter
