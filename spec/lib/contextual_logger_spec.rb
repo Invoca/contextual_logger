@@ -170,4 +170,56 @@ describe 'ContextualLogging' do
       end
     end
   end
+
+  describe 'global_context' do
+    before do
+      @logger.global_context = { service: 'test_service' }
+    end
+
+    it 'should print out global context with log line' do
+      expected_log_line = {
+        service: 'test_service',
+        message: 'this is a test',
+        severity: 'INFO',
+        timestamp: Time.now,
+        progname: nil
+      }.to_json
+
+      expect_any_instance_of(Logger::LogDevice).to receive(:write).with("#{expected_log_line}\n")
+
+      expect(@logger.info('this is a test')).to eq(true)
+    end
+
+    it 'should merge global context with inline context' do
+      expected_log_line = {
+        service: 'test_service',
+        file: 'this_file.json',
+        message: 'this is a test',
+        severity: 'INFO',
+        timestamp: Time.now,
+        progname: nil
+      }.to_json
+
+      expect_any_instance_of(Logger::LogDevice).to receive(:write).with("#{expected_log_line}\n")
+
+      expect(@logger.info('this is a test', file: 'this_file.json')).to eq(true)
+    end
+
+    it 'should merge global context with with_context block' do
+      expected_log_line = {
+        service: 'test_service',
+        file: 'this_file.json',
+        message: 'this is a test',
+        severity: 'INFO',
+        timestamp: Time.now,
+        progname: nil
+      }.to_json
+
+      expect_any_instance_of(Logger::LogDevice).to receive(:write).with("#{expected_log_line}\n")
+
+      @logger.with_context(file: 'this_file.json') do
+        expect(@logger.info('this is a test')).to eq(true)
+      end
+    end
+  end
 end

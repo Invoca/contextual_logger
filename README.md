@@ -33,3 +33,8 @@ rescue => ex
   contextual_logger.error('Something definitely just happened', error: ex.message)
 end
 ```
+
+If you'd like to set a global context for your process, you can do the following
+```ruby
+contextual_logger.global_context = { service_name: 'test_service' }
+```

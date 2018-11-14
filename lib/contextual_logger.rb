@@ -7,6 +7,10 @@ module ContextualLogger
     logger.extend(self)
   end
 
+  def global_context=(context)
+    Thread.current[THREAD_CONTEXT_NAMESPACE] = context
+  end
+
   def with_context(context)
     previous_context = Thread.current[THREAD_CONTEXT_NAMESPACE] || {}
     Thread.current[THREAD_CONTEXT_NAMESPACE] = previous_context.merge(context)
