@@ -4,14 +4,10 @@ require 'spec_helper'
 require 'logger'
 require 'contextual_logger'
 
-class DummyLogger < Logger
-  include ContextualLogger
-end
-
 describe 'ContextualLogging' do
   before do
     Time.now_override = Time.now
-    @logger = DummyLogger.new('/dev/null')
+    @logger = ContextualLogger.new(Logger.new('/dev/null'))
   end
 
   it 'should respond to with_context' do

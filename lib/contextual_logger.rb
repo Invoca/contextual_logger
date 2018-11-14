@@ -3,6 +3,10 @@
 require 'json'
 
 module ContextualLogger
+  def self.new(logger)
+    logger.extend(self)
+  end
+
   def with_context(context)
     previous_context = Thread.current[THREAD_CONTEXT_NAMESPACE]
     Thread.current[THREAD_CONTEXT_NAMESPACE] = context
@@ -16,12 +20,7 @@ module ContextualLogger
   end
 
   def format_message(severity, timestamp, progname, message, context)
-    message_with_context = context.merge(
-      message: message,
-      severity: severity,
-      timestamp: timestamp,
-      progname: progname
-    )
+    message_with_context = message_with_context(context, message, severity, timestamp, progname)
 
     if @formatter
       @formatter.call(severity, timestamp, progname, message_with_context)
@@ -60,4 +59,13 @@ module ContextualLogger
   private
 
   THREAD_CONTEXT_NAMESPACE = 'ContextualLoggerCurrentLoggingContext'
+
+  def message_with_context(context, message, severity, timestamp, progname)
+    context.merge(
+      message: message,
+      severity: severity,
+      timestamp: timestamp,
+      progname: progname
+    )
+  end
 end
