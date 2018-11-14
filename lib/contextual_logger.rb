@@ -29,8 +29,28 @@ module ContextualLogger
     end
   end
 
+  def debug(progname = nil, **extra_context, &block)
+    add(Logger::Severity::DEBUG, nil, progname, extra_context, &block)
+  end
+
   def info(progname = nil, **extra_context, &block)
     add(Logger::Severity::INFO, nil, progname, extra_context, &block)
+  end
+
+  def warn(progname = nil, **extra_context, &block)
+    add(Logger::Severity::WARN, nil, progname, extra_context, &block)
+  end
+
+  def error(progname = nil, **extra_context, &block)
+    add(Logger::Severity::ERROR, nil, progname, extra_context, &block)
+  end
+
+  def fatal(progname = nil, **extra_context, &block)
+    add(Logger::Severity::FATAL, nil, progname, extra_context, &block)
+  end
+
+  def unknown(progname = nil, **extra_context, &block)
+    add(Logger::Severity::UNKNOWN, nil, progname, extra_context, &block)
   end
 
   def add(severity, message = nil, progname = nil, extra_context = nil)
