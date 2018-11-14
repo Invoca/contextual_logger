@@ -6,7 +6,7 @@ Gem::Specification.new do |spec|
   spec.description = "A way to add context to the logs you have"
   spec.authors     = ["James Ebentier"]
   spec.email       = 'jebentier@invoca.com'
-  spec.files       = ["lib/contextual_logging.rb"]
+  spec.files       = ["lib/contextual_logger.rb"]
   spec.homepage    = 'https://github.com/Invoca/contextual_logger'
 
   spec.add_dependency 'json'
