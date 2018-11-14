@@ -8,8 +8,8 @@ module ContextualLogger
   end
 
   def with_context(context)
-    previous_context = Thread.current[THREAD_CONTEXT_NAMESPACE]
-    Thread.current[THREAD_CONTEXT_NAMESPACE] = context
+    previous_context = Thread.current[THREAD_CONTEXT_NAMESPACE] || {}
+    Thread.current[THREAD_CONTEXT_NAMESPACE] = previous_context.merge(context)
     yield if block_given?
   ensure
     Thread.current[THREAD_CONTEXT_NAMESPACE] = previous_context

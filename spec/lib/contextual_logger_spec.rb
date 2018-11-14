@@ -150,5 +150,24 @@ describe 'ContextualLogging' do
         expect(@logger.info('this is a test', service: 'test_service_2')).to eq(true)
       end
     end
+
+    it 'should combine tiered contexts when logging' do
+      expected_log_line = {
+        service: 'test_service',
+        file: 'this_file.json',
+        message: 'this is a test',
+        severity: 'INFO',
+        timestamp: Time.now,
+        progname: nil
+      }.to_json
+
+      expect_any_instance_of(Logger::LogDevice).to receive(:write).with("#{expected_log_line}\n")
+
+      @logger.with_context(service: 'test_service') do
+        @logger.with_context(file: 'this_file.json') do
+          expect(@logger.info('this is a test')).to eq(true)
+        end
+      end
+    end
   end
 end
