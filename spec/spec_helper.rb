@@ -1,15 +1,7 @@
 # frozen_string_literal: true
 
-require 'simplecov'
-require 'simplecov-json'
-require 'simplecov-rcov'
-
-SimpleCov.formatters = [
-  SimpleCov::Formatter::HTMLFormatter,
-  SimpleCov::Formatter::JSONFormatter,
-  SimpleCov::Formatter::RcovFormatter
-]
-SimpleCov.start
+require 'coveralls'
+Coveralls.wear!
 
 RSpec.configure do |config|
   config.expect_with :rspec do |expectations|

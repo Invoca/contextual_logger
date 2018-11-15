@@ -2,6 +2,8 @@ source 'http://rubygems.org'
 
 gemspec
 
+gem 'coveralls', require: false
+
 group :development do
   gem 'bump', '~> 0.6.1'
   gem 'pry'
@@ -14,7 +16,4 @@ end
 group :test do
   gem 'rspec'
   gem 'rspec_junit_formatter'
-  gem 'simplecov'
-  gem 'simplecov-json'
-  gem 'simplecov-rcov'
 end
