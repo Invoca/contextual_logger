@@ -5,10 +5,16 @@ labels:
 
 ---
 
-**Describe the bug**
+### Describe the bug
+
 A clear and concise description of what the bug is.
 
-**To Reproduce**
+### Gem Version Used
+
+v0.1.0
+
+### To Reproduce
+
 Code snippet to reproduce
 ``` ruby
 require 'contextual_logger'
@@ -18,11 +24,14 @@ logger = ContextualLogger.new(Logger.new(STDOUT))
 ...
 ```
 
-**Expected behavior**
+### Expected behavior
+
 A clear and concise description of what you expected to happen.
 
-**Screenshots/Stacktraces**
+### Screenshots/Stacktraces
+
 If applicable, add screenshots and/or stacktraces to help explain your problem.
 
-**Additional context**
+### Additional context
+
 Add any other context about the problem here.
