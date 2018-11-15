@@ -6,7 +6,6 @@ This document explains our guidelines and workflows to contributing to an Invoca
 1. Install the ruby version specified in the [.ruby-version](https://github.com/Invoca/contextual_logger/blob/master/.ruby-version) file (preferably you're using [rvm](https://rvm.io/) or [rbenv](https://github.com/rbenv/rbenv) to manage ruby versions)
 2. Make a fork of ContextualLogger, then clone your fork to your machine
 3. Run `bundle install` in your ContextualLogger directory to install dependencies
-4. You're ready to go
 
 ## Branching
 
