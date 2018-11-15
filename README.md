@@ -1,4 +1,4 @@
-# ContextualLogger
+# ContextualLogger [![Build Status](https://travis-ci.org/Invoca/contextual_logger.svg?branch=master)](https://travis-ci.org/Invoca/contextual_logger)
 This gem adds the ability to your ruby logger, to accept conditional context, and utilize it when formatting your log entry.
 
 ## Installation
