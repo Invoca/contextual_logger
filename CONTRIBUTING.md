@@ -2,6 +2,9 @@
 
 This document explains our guidelines and workflows to contributing to an Invoca open source project.  Please take care to follow the guidelines, as they exist to help us manage changes in a timely and efficient manner.
 
+## Code of Conduct
+All contributors to this project must adhere to the [Community Code of Conduct](https://github.com/Invoca/contextual_logger/blob/master/code-of-conduct.md)
+
 ## Environment Setup
 1. Install the ruby version specified in the [.ruby-version](https://github.com/Invoca/contextual_logger/blob/master/.ruby-version) file (preferably you're using [rvm](https://rvm.io/) or [rbenv](https://github.com/rbenv/rbenv) to manage ruby versions)
 2. Make a fork of ContextualLogger, then clone your fork to your machine

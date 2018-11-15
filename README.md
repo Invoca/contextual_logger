@@ -40,4 +40,5 @@ contextual_logger.global_context = { service_name: 'test_service' }
 ```
 
 ## Contributions
-All contributors to this project must adhere to the [Community Code of Conduct](https://github.com/Invoca/contextual_logger/blob/master/code-of-conduct.md)
+
+Contributions to this project are always welcome.  Please thoroughly read our [Contribution Guidelines](https://github.com/Invoca/contextual_logger/blob/master/CONTRIBUTING.md) before starting any work.
