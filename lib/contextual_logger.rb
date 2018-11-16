@@ -1,4 +1,4 @@
-# frozen_string literal: true
+# frozen_string_literal: true
 
 require 'json'
 
@@ -59,7 +59,7 @@ module ContextualLogger
 
   def add(severity, message = nil, progname = nil, extra_context = nil)
     severity ||= UNKNOWN
-    if @logdev.nil? or severity < @level
+    if @logdev.nil? || (severity < @level)
       return true
     end
     progname ||= @progname
@@ -78,7 +78,6 @@ module ContextualLogger
   def write_entry_to_log(severity, timestamp, progname, message, context)
     @logdev.write(format_message(format_severity(severity), timestamp, progname, message, context))
   end
-
 
   private
 

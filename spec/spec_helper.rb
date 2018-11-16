@@ -15,17 +15,15 @@ end
 
 class Time
   class << self
-    def now_override= override_time
-      @@now_override = override_time
-    end
+    attr_writer :now_override
 
     def now_override
-      @@now_override ||= nil
+      @now_override ||= nil
     end
 
-    unless defined? @@_old_now_defined
+    unless defined? @_old_now_defined
       alias old_now now
-      @@_old_now_defined = true
+      @_old_now_defined = true
     end
   end
 

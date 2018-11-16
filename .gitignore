@@ -48,3 +48,6 @@ build-iPhoneSimulator/
 
 # unless supporting rvm < 1.11.0 or doing something fancy, ignore this:
 .rvmrc
+
+# rubocop
+.rubocop-https---raw-githubusercontent-com-Invoca-style-guide-master-ruby--rubocop-yml
