@@ -2,8 +2,18 @@
 This gem adds the ability to your ruby logger, to accept conditional context, and utilize it when formatting your log entry.
 
 ## Installation
-To use an unreleased version, add it to your Gemfile for Bundler:
+To install this gem directly on your machine from rubygems, run the following:
+```ruby
+gem install contextual_logger
 ```
+
+To install this gem in your bundler project, add the following to your Gemfile:
+```ruby
+gem 'contextual_logger', '~> 0.1'
+```
+
+To use an unreleased version, add it to your Gemfile for Bundler:
+```ruby
 gem 'contextual_logger', git: 'git://github.com/Invoca/contextual_logger.git'
 ```
 
