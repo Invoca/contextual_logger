@@ -38,3 +38,7 @@ If you'd like to set a global context for your process, you can do the following
 ```ruby
 contextual_logger.global_context = { service_name: 'test_service' }
 ```
+
+## Contributions
+
+Contributions to this project are always welcome.  Please thoroughly read our [Contribution Guidelines](https://github.com/Invoca/contextual_logger/blob/master/CONTRIBUTING.md) before starting any work.
