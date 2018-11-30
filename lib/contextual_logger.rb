@@ -71,7 +71,7 @@ module ContextualLogger
         progname = @progname
       end
     end
-    write_entry_to_log(severity, Time.now, progname, message, current_context_for_thread.merge(extra_context))
+    write_entry_to_log(severity, Time.now, progname, message, current_context_for_thread.merge(extra_context || {}))
     true
   end
 

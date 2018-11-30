@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    contextual_logger (0.2.0)
+    contextual_logger (0.2.1)
       json
 
 GEM
