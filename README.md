@@ -49,6 +49,15 @@ If you'd like to set a global context for your process, you can do the following
 contextual_logger.global_context = { service_name: 'test_service' }
 ```
 
+### Overrides
+#### ActiveSupport::TaggedLogging
+ActiveSupport's TaggedLogging extension adds the ability for tags to be prepended onto logs in an easy to use way.  This is a very
+powerful piece of functionality.  If you're using this, there is an override you can use, to pull the tags into the context.
+All you need to do is add the following to your application's start up script:
+```ruby
+require 'contextual_logger/overrides/active_support/tagged_logging/formatter'
+```
+
 ## Contributions
 
 Contributions to this project are always welcome.  Please thoroughly read our [Contribution Guidelines](https://github.com/Invoca/contextual_logger/blob/master/CONTRIBUTING.md) before starting any work.
