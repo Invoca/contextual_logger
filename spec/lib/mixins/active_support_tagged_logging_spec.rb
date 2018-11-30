@@ -10,7 +10,7 @@ describe 'ContextualLogger::Overrides::ActiveSupport::TaggedLogging::Formatter' 
   before do
     Time.now_override = Time.now
     @logger = ContextualLogger.new(Logger.new('/dev/null'))
-    @logger.formatter = -> (_, _, _, msg_with_context) { "#{msg_with_context.to_json}\n" }
+    @logger.formatter = ->(_, _, _, msg_with_context) { "#{msg_with_context.to_json}\n" }
     @logger = ActiveSupport::TaggedLogging.new(@logger)
   end
 

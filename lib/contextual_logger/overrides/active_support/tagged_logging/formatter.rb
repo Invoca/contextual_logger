@@ -9,7 +9,7 @@ module ActiveSupport
                           msg.merge(log_tags: current_tags.join(', '))
                         else
                           "#{tags_text}#{msg}"
-                        end 
+                        end
 
         super(severity, timestamp, progname, msg_with_tags)
       end
