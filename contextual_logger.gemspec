@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.description = 'A way to add context to the logs you have'
   spec.authors     = ['James Ebentier']
   spec.email       = 'jebentier@invoca.com'
-  spec.files       = ['lib/contextual_logger.rb', 'lib/mixins/**/*']
+  spec.files       = Dir['lib/**/*']
   spec.homepage    = 'https://rubygems.org/gems/contextual_logger'
   spec.metadata    = { 'source_code_uri' => 'https://github.com/Invoca/contextual_logger' }
 
