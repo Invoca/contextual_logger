@@ -7,6 +7,7 @@ gemspec
 gem 'coveralls', require: false
 
 group :development do
+  gem 'activesupport'
   gem 'bump', '~> 0.6.1'
   gem 'pry'
   gem 'rubocop', '0.54.0'
