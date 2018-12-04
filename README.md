@@ -27,6 +27,7 @@ require 'contextual_logger'
 logger = Logger.new(STDOUT)
 contextual_logger = ContextualLogger.new(logger)
 ```
+**Note: This returns the original logger, mutated with the ContextualLogger mixin**
 
 ### Logging
 All base logging methods are available for use with _or_ without added context
