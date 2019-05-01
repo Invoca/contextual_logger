@@ -20,7 +20,6 @@ module ContextualLogger
     else
       context_handler
     end
-
   ensure
     context_handler.reset! if block_given?
   end
