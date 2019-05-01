@@ -8,6 +8,7 @@ describe 'ContextualLogging' do
   before do
     Time.now_override = Time.now
     @logger = ContextualLogger.new(Logger.new('/dev/null'))
+    @logger.global_context = {}
   end
 
   it 'should respond to with_context' do
@@ -168,6 +169,79 @@ describe 'ContextualLogging' do
           expect(@logger.info('this is a test')).to eq(true)
         end
       end
+    end
+  end
+
+  describe 'with_context without block' do
+    it 'returns a context handler' do
+      expect(@logger.with_context(service: 'test_service')).to be_a(ContextualLogger::Context::Handler)
+    end
+
+    it 'prints out the wrapper context with logging' do
+      expected_log_line = {
+        service: 'test_service',
+        message: 'this is a test',
+        severity: 'INFO',
+        timestamp: Time.now,
+        progname: nil
+      }.to_json
+
+      expect_any_instance_of(Logger::LogDevice).to receive(:write).with("#{expected_log_line}\n")
+
+      handler = @logger.with_context(service: 'test_service')
+      expect(@logger.info('this is a test')).to eq(true)
+      handler.reset!
+    end
+
+    it 'merges inline context into wrapper context when logging' do
+      expected_log_line = {
+        service: 'test_service',
+        file: 'this_file.json',
+        message: 'this is a test',
+        severity: 'INFO',
+        timestamp: Time.now,
+        progname: nil
+      }.to_json
+
+      expect_any_instance_of(Logger::LogDevice).to receive(:write).with("#{expected_log_line}\n")
+
+      handler = @logger.with_context(service: 'test_service')
+      expect(@logger.info('this is a test', file: 'this_file.json')).to eq(true)
+      handler.reset!
+    end
+
+    it 'takes inline context over wrapper context when logging' do
+      expected_log_line = {
+        service: 'test_service_2',
+        message: 'this is a test',
+        severity: 'INFO',
+        timestamp: Time.now,
+        progname: nil
+      }.to_json
+
+      expect_any_instance_of(Logger::LogDevice).to receive(:write).with("#{expected_log_line}\n")
+
+      handler = @logger.with_context(service: 'test_service')
+      expect(@logger.info('this is a test', service: 'test_service_2')).to eq(true)
+      handler.reset!
+    end
+
+    it 'combines tiered contexts when logging' do
+      expected_log_line = {
+        service: 'test_service',
+        file: 'this_file.json',
+        message: 'this is a test',
+        severity: 'INFO',
+        timestamp: Time.now,
+        progname: nil
+      }.to_json
+
+      expect_any_instance_of(Logger::LogDevice).to receive(:write).with("#{expected_log_line}\n")
+
+      handler1 = @logger.with_context(service: 'test_service')
+      handler2 = @logger.with_context(file: 'this_file.json')
+      expect(@logger.info('this is a test')).to eq(true)
+      handler1.reset!
     end
   end
 
