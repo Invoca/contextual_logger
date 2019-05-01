@@ -243,7 +243,7 @@ describe 'ContextualLogging' do
       expect_any_instance_of(Logger::LogDevice).to receive(:write).with("#{expected_log_line}\n")
 
       handler1 = @logger.with_context(service: 'test_service')
-      handler2 = @logger.with_context(file: 'this_file.json')
+      @logger.with_context(file: 'this_file.json')
       expect(@logger.info('this is a test')).to eq(true)
       handler1.reset!
     end
