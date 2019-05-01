@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'json'
+require_relative './contextual_logger/context/handler'
 
 module ContextualLogger
   def self.new(logger)
@@ -8,19 +9,23 @@ module ContextualLogger
   end
 
   def global_context=(context)
-    Thread.current[THREAD_CONTEXT_NAMESPACE] = context
+    ContextualLogger::Context::Handler.new(context).set!
   end
 
   def with_context(context)
-    previous_context = Thread.current[THREAD_CONTEXT_NAMESPACE] || {}
-    Thread.current[THREAD_CONTEXT_NAMESPACE] = previous_context.merge(context)
-    yield if block_given?
+    context_handler = ContextualLogger::Context::Handler.new(current_context_for_thread.merge(context))
+    context_handler.set!
+    if block_given?
+      yield
+    else
+      context_handler
+    end
   ensure
-    Thread.current[THREAD_CONTEXT_NAMESPACE] = previous_context
+    context_handler.reset! if block_given?
   end
 
   def current_context_for_thread
-    Thread.current[THREAD_CONTEXT_NAMESPACE] || {}
+    ContextualLogger::Context::Handler.current_context
   end
 
   def format_message(severity, timestamp, progname, message, context)
@@ -80,8 +85,6 @@ module ContextualLogger
   end
 
   private
-
-  THREAD_CONTEXT_NAMESPACE = 'ContextualLoggerCurrentLoggingContext'
 
   def message_with_context(context, message, severity, timestamp, progname)
     context.merge(

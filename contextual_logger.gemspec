@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |spec|
   spec.name        = 'contextual_logger'
-  spec.version     = '0.2.1'
+  spec.version     = '0.3.0'
   spec.license     = 'MIT'
   spec.date        = '2018-10-12'
   spec.summary     = 'Add context to your logger'
