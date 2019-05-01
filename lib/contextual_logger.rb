@@ -15,8 +15,12 @@ module ContextualLogger
   def with_context(context)
     context_handler = ContextualLogger::Context::Handler.new(current_context_for_thread.merge(context))
     context_handler.set!
-    yield if block_given?
-    context_handler
+    if block_given?
+      yield
+    else
+      context_handler
+    end
+
   ensure
     context_handler.reset! if block_given?
   end

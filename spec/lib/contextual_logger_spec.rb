@@ -170,6 +170,10 @@ describe 'ContextualLogging' do
         end
       end
     end
+
+    it 'returns the output of the block passed in' do
+      expect(@logger.with_context(service: 'test_service') { 6 }).to eq(6)
+    end
   end
 
   describe 'with_context without block' do
