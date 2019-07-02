@@ -5,9 +5,12 @@ require 'logger'
 require 'contextual_logger'
 
 describe 'ContextualLogging' do
-  before do
+  before(:each) do
     Time.now_override = Time.now
     @logger = ContextualLogger.new(Logger.new('/dev/null'))
+  end
+
+  after(:each) do
     @logger.global_context = {}
   end
 
@@ -297,6 +300,31 @@ describe 'ContextualLogging' do
 
       @logger.with_context(file: 'this_file.json') do
         expect(@logger.info('this is a test')).to eq(true)
+      end
+    end
+  end
+
+  describe 'with varying levels of context' do
+    it 'deep merges contexts with sub hashes' do
+      expected_log_line = {
+        service: 'test_service',
+        array_context: [3],
+        hash_context: {
+          apple: 'orange',
+          hello: 'goodbye',
+          pizza: 'bagel',
+        },
+        message: 'this is a test',
+        severity: 'INFO',
+        timestamp: Time.now,
+        progname: nil
+      }.to_json
+
+      expect_any_instance_of(Logger::LogDevice).to receive(:write).with("#{expected_log_line}\n")
+
+      @logger.global_context = { service: 'test_service', array_context: [1, 2] }
+      @logger.with_context(hash_context: { apple: 'orange', hello: 'world' }) do
+        expect(@logger.info('this is a test', array_context: [3], hash_context: { pizza: 'bagel', hello: 'goodbye' })).to eq(true)
       end
     end
   end

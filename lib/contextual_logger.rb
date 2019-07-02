@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'active_support'
 require 'json'
 require_relative './contextual_logger/context/handler'
 
@@ -13,7 +14,7 @@ module ContextualLogger
   end
 
   def with_context(context)
-    context_handler = ContextualLogger::Context::Handler.new(current_context_for_thread.merge(context))
+    context_handler = ContextualLogger::Context::Handler.new(current_context_for_thread.deep_merge(context))
     context_handler.set!
     if block_given?
       yield
@@ -76,7 +77,7 @@ module ContextualLogger
         progname = @progname
       end
     end
-    write_entry_to_log(severity, Time.now, progname, message, current_context_for_thread.merge(extra_context || {}))
+    write_entry_to_log(severity, Time.now, progname, message, current_context_for_thread.deep_merge(extra_context || {}))
     true
   end
 
