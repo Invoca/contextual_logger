@@ -14,4 +14,5 @@ Gem::Specification.new do |spec|
   spec.metadata    = { 'source_code_uri' => 'https://github.com/Invoca/contextual_logger' }
 
   spec.add_runtime_dependency 'json'
+  spec.add_runtime_dependency 'activesupport'
 end
