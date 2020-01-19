@@ -10,11 +10,11 @@ module ContextualLogger
   end
 
   def global_context=(context)
-    ContextualLogger::Context::Handler.new(context).set!
+    Context::Handler.new(context).set!
   end
 
   def with_context(context)
-    context_handler = ContextualLogger::Context::Handler.new(current_context_for_thread.deep_merge(context))
+    context_handler = Context::Handler.new(current_context_for_thread.deep_merge(context))
     context_handler.set!
     if block_given?
       yield
@@ -26,7 +26,7 @@ module ContextualLogger
   end
 
   def current_context_for_thread
-    ContextualLogger::Context::Handler.current_context
+    Context::Handler.current_context
   end
 
   def format_message(severity, timestamp, progname, message, context)
