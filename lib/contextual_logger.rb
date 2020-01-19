@@ -40,34 +40,41 @@ module ContextualLogger
   end
 
   def debug(progname = nil, **extra_context, &block)
-    add(Logger::Severity::DEBUG, nil, progname, extra_context, &block)
+    add_if_enabled(Logger::Severity::DEBUG, nil, progname, extra_context, &block)
   end
 
   def info(progname = nil, **extra_context, &block)
-    add(Logger::Severity::INFO, nil, progname, extra_context, &block)
+    add_if_enabled(Logger::Severity::INFO, nil, progname, extra_context, &block)
   end
 
   def warn(progname = nil, **extra_context, &block)
-    add(Logger::Severity::WARN, nil, progname, extra_context, &block)
+    add_if_enabled(Logger::Severity::WARN, nil, progname, extra_context, &block)
   end
 
   def error(progname = nil, **extra_context, &block)
-    add(Logger::Severity::ERROR, nil, progname, extra_context, &block)
+    add_if_enabled(Logger::Severity::ERROR, nil, progname, extra_context, &block)
   end
 
   def fatal(progname = nil, **extra_context, &block)
-    add(Logger::Severity::FATAL, nil, progname, extra_context, &block)
+    add_if_enabled(Logger::Severity::FATAL, nil, progname, extra_context, &block)
   end
 
   def unknown(progname = nil, **extra_context, &block)
-    add(Logger::Severity::UNKNOWN, nil, progname, extra_context, &block)
+    add_if_enabled(Logger::Severity::UNKNOWN, nil, progname, extra_context, &block)
   end
 
-  def add(severity, message = nil, progname = nil, extra_context = nil)
-    severity ||= UNKNOWN
-    if @logdev.nil? || (severity < @level)
-      return true
+  def log_level_enabled(severity)
+    severity >= @level
+  end
+
+  def add_if_enabled(severity, message, progname, extra_context, &block)
+    if @logdev && log_level_enabled(severity)
+      add(severity, message, progname, extra_context, &block)
     end
+    true
+  end
+
+  def add(severity, message, progname, extra_context)
     progname ||= @progname
     if message.nil?
       if block_given?
@@ -78,7 +85,6 @@ module ContextualLogger
       end
     end
     write_entry_to_log(severity, Time.now, progname, message, current_context_for_thread.deep_merge(extra_context || {}))
-    true
   end
 
   def write_entry_to_log(severity, timestamp, progname, message, context)

@@ -13,18 +13,94 @@ RSpec::Matchers.define :a_json_log_line_like do |expected|
   match { |actual| JSON.parse(actual) == JSON.parse(expected) }
 end
 
-describe 'ContextualLogging' do
+describe ContextualLogger do
   before(:each) { Time.now_override = Time.now }
   after(:each)  { logger.global_context = {} }
 
   subject(:logger) { ContextualLogger.new(Logger.new('/dev/null')) }
 
   it { is_expected.to respond_to(:with_context) }
-  it { is_expected.to respond_to(:debug) }
-  it { is_expected.to respond_to(:info) }
-  it { is_expected.to respond_to(:warn) }
-  it { is_expected.to respond_to(:error) }
-  it { is_expected.to respond_to(:fatal) }
+
+  context 'log_level' do
+    let(:log_stream) { StringIO.new }
+    let(:default_logger) { ContextualLogger.new(Logger.new(log_stream)) }
+    let(:log_level) { Logger::Severity::DEBUG }
+    let(:logger) { ContextualLogger.new(Logger.new(log_stream, level: log_level)) }
+
+    def log_at_every_level(logger)
+      logger.debug("debug message")
+      logger.info("info message")
+      logger.warn("warn message")
+      logger.error("error message")
+      logger.fatal("fatal message")
+      logger.unknown("unknown message")
+    end
+
+    def log_message_levels
+      log_stream.string.split("\n").map { |log_line| log_line[/([a-z]+) message/, 1] }
+    end
+
+    context 'at default level' do
+      it 'respects log level debug' do
+        log_at_every_level(default_logger)
+        expect(log_message_levels).to eq(["debug", "info", "warn", "error", "fatal", "unknown"])
+      end
+    end
+
+    context 'at level debug' do
+      let(:log_level) { Logger::Severity::DEBUG }
+
+      it 'respects log level' do
+        log_at_every_level(logger)
+        expect(log_message_levels).to eq(["debug", "info", "warn", "error", "fatal", "unknown"])
+      end
+    end
+
+    context 'at level info' do
+      let(:log_level) { Logger::Severity::INFO }
+
+      it 'respects log level' do
+        log_at_every_level(logger)
+        expect(log_message_levels).to eq(["info", "warn", "error", "fatal", "unknown"])
+      end
+    end
+
+    context 'at level warn' do
+      let(:log_level) { Logger::Severity::WARN }
+
+      it 'respects log level' do
+        log_at_every_level(logger)
+        expect(log_message_levels).to eq(["warn", "error", "fatal", "unknown"])
+      end
+    end
+
+    context 'at level error' do
+      let(:log_level) { Logger::Severity::ERROR }
+
+      it 'respects log level' do
+        log_at_every_level(logger)
+        expect(log_message_levels).to eq(["error", "fatal", "unknown"])
+      end
+    end
+
+    context 'at level fatal' do
+      let(:log_level) { Logger::Severity::FATAL }
+
+      it 'respects log level' do
+        log_at_every_level(logger)
+        expect(log_message_levels).to eq(["fatal", "unknown"])
+      end
+    end
+
+    context 'at level unknown' do
+      let(:log_level) { Logger::Severity::UNKNOWN }
+
+      it 'respects log level' do
+        log_at_every_level(logger)
+        expect(log_message_levels).to eq(["unknown"])
+      end
+    end
+  end
 
   describe 'inline context' do
     let(:expected_log_hash) do
