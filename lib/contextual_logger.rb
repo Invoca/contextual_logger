@@ -5,10 +5,13 @@ require 'json'
 require_relative './contextual_logger/context/handler'
 
 module ContextualLogger
-  def self.new(logger)
-    logger.extend(self)
+  class << self
+    def new(logger)
+      logger.extend(LoggerMixin)
+    end
   end
 
+  module LoggerMixin
   def global_context=(context)
     Context::Handler.new(context).set!
   end
@@ -19,7 +22,7 @@ module ContextualLogger
     if block_given?
       yield
     else
-      context_handler
+      context_handler # JEB, is this actually useful? The set! and reset! wouldn't mean anything, so it would just be calling Context::Handler.new, right? -Colin
     end
   ensure
     context_handler.reset! if block_given?
