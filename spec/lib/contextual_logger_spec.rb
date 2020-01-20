@@ -107,8 +107,7 @@ describe ContextualLogger do
       {
         service: 'test_service',
         message: 'this is a test',
-        timestamp: Time.now,
-        progname: nil
+        timestamp: Time.now
       }
     end
 
@@ -144,8 +143,7 @@ describe ContextualLogger do
         service: 'test_service',
         message: 'this is a test',
         severity: 'INFO',
-        timestamp: Time.now,
-        progname: nil
+        timestamp: Time.now
       }
     end
 
@@ -194,8 +192,7 @@ describe ContextualLogger do
         service: 'test_service',
         message: 'this is a test',
         severity: 'INFO',
-        timestamp: Time.now,
-        progname: nil
+        timestamp: Time.now
       }
     end
 
@@ -243,8 +240,7 @@ describe ContextualLogger do
         service: 'test_service',
         message: 'this is a test',
         severity: 'INFO',
-        timestamp: Time.now,
-        progname: nil
+        timestamp: Time.now
       }
     end
 
@@ -282,8 +278,7 @@ describe ContextualLogger do
         },
         message: 'this is a test',
         severity: 'INFO',
-        timestamp: Time.now,
-        progname: nil
+        timestamp: Time.now
       }
     end
 

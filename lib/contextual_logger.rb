@@ -88,12 +88,15 @@ module ContextualLogger
   end
 
   def message_with_context(context, message, severity, timestamp, progname)
-    context.merge(
-      message: message,
-      severity: severity,
-      timestamp: timestamp,
-      progname: progname
-    )
+    extra_context =
+      {
+        message: message,
+        severity: severity,
+        timestamp: timestamp
+      }
+    extra_context[:progname] = progname if progname
+
+    context.merge(extra_context)
   end
   end
 end

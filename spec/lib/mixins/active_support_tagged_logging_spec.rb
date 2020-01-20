@@ -21,7 +21,6 @@ describe 'ContextualLogger::Overrides::ActiveSupport::TaggedLogging::Formatter' 
       message: 'this is a test',
       severity: 'DEBUG',
       timestamp: Time.now,
-      progname: nil,
       log_tags: 'test'
     }.to_json
 
