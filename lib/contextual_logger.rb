@@ -61,7 +61,7 @@ module ContextualLogger
   end
 
   def add_if_enabled(severity, message, extra_context:)
-    if @logdev && log_level_enabled?(severity)
+    if log_level_enabled?(severity)
       add(severity, message: message, progname: @progname, extra_context: extra_context)
     end
     true
@@ -69,6 +69,10 @@ module ContextualLogger
 
   def add(severity, message:, progname:, extra_context:)
     write_entry_to_log(severity, Time.now, progname, message, current_context_for_thread.deep_merge(extra_context))
+  end
+
+  def write_entry_to_log(severity, timestamp, progname, message, context)
+    @logdev&.write(format_message(format_severity(severity), timestamp, progname, message, context))
   end
 
   private
@@ -81,10 +85,6 @@ module ContextualLogger
     else
       "#{message_with_context.to_json}\n"
     end
-  end
-
-  def write_entry_to_log(severity, timestamp, progname, message, context)
-    @logdev.write(format_message(format_severity(severity), timestamp, progname, message, context))
   end
 
   def message_with_context(context, message, severity, timestamp, progname)
