@@ -57,7 +57,7 @@ module ContextualLogger
   end
 
   def log_level_enabled?(severity)
-    severity >= @level
+    severity >= level
   end
 
   def add_if_enabled(severity, message, extra_context:)

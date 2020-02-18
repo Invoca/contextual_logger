@@ -2,18 +2,26 @@
 
 module ContextualLogger
   # A logger that deep_merges additional context and then delegates to the given logger.
-  # Keeps it own log level that may be set independently of the logger it delegates to (the latter's log level is ignored).
+  # Keeps it own log level (called override_level) that may be set independently of the logger it delegates to.
+  # If override_level is non-nil, it takes precedence; if it is nil (the default), then it delegates to the logger.
   class LoggerWithContext
     include LoggerMixin
 
-    attr_accessor :level
-    attr_reader :context
+    attr_reader :logger, :override_level, :context
 
     def initialize(logger, context, level: nil)
       @logger = logger
-      @level = level || logger.level
+      @override_level = level
       @context = context
       @merged_context_cache = {}  # so we don't have to merge every time
+    end
+
+    def level
+      @override_level || @logger.level
+    end
+
+    def level=(override_level)
+      @override_level = override_level
     end
 
     def write_entry_to_log(severity, timestamp, progname, message, context)

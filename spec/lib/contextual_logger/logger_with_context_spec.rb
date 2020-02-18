@@ -52,23 +52,35 @@ describe ContextualLogger::LoggerWithContext do
           expect(log_message_levels).to eq(["fatal", "unknown"])
         end
 
-        it "ignores changes to the base log level" do
+        it "follows changes to the base log level when default level is used" do
           subject
           base_logger.level = Logger::Severity::INFO
           log_at_every_level(subject)
-          expect(log_message_levels).to eq(["fatal", "unknown"])
+          expect(log_message_levels).to eq(["info", "warn", "error", "fatal", "unknown"])
         end
 
-        it "can change its own log_level" do
+        it "can change its own log_level and then ignores changes to the base log level (as long as it's non-nil)" do
           subject.level = Logger::Severity::INFO
+          base_logger.level = Logger::Severity::WARN
+          expect(subject.override_level).to eq(Logger::Severity::INFO)
           log_at_every_level(subject)
           expect(log_message_levels).to eq(["info", "warn", "error", "fatal", "unknown"])
+          log_stream.string.clear
+          subject.level = nil
+          expect(subject.override_level).to eq(nil)
+          log_at_every_level(subject)
+          expect(log_message_levels).to eq(["warn", "error", "fatal", "unknown"])
         end
 
         context "when constructed with its own level" do
           subject(:logger_with_context) { ContextualLogger::LoggerWithContext.new(base_logger, context, level: Logger::Severity::WARN) }
 
-          it "respects its own log_level" do
+          it "respects its own log_level and ignores changes to the base log level" do
+            expect(subject.override_level).to eq(Logger::Severity::WARN)
+            log_at_every_level(subject)
+            expect(log_message_levels).to eq(["warn", "error", "fatal", "unknown"])
+            log_stream.string.clear
+            base_logger.level = Logger::Severity::FATAL
             log_at_every_level(subject)
             expect(log_message_levels).to eq(["warn", "error", "fatal", "unknown"])
           end
