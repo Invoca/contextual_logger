@@ -8,19 +8,6 @@ require 'json'
 
 describe ContextualLogger::LoggerWithContext do
   context 'log_level' do
-    def log_at_every_level(logger)
-      logger.debug("debug message")
-      logger.info("info message")
-      logger.warn("warn message")
-      logger.error("error message")
-      logger.fatal("fatal message")
-      logger.unknown("unknown message")
-    end
-
-    def log_message_levels
-      log_stream.string.split("\n").map { |log_line| log_line[/([a-z]+) message/, 1] }
-    end
-
     context "when created with a base logger" do
       let(:log_stream) { StringIO.new }
       let(:base_logger) { ContextualLogger.new(Logger.new(log_stream, level: Logger::Severity::FATAL)) }

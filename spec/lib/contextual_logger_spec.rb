@@ -27,19 +27,6 @@ describe ContextualLogger do
     let(:log_level) { Logger::Severity::DEBUG }
     let(:logger) { ContextualLogger.new(Logger.new(log_stream, level: log_level)) }
 
-    def log_at_every_level(logger)
-      logger.debug("debug message")
-      logger.info("info message")
-      logger.warn("warn message")
-      logger.error("error message")
-      logger.fatal("fatal message")
-      logger.unknown("unknown message")
-    end
-
-    def log_message_levels
-      log_stream.string.split("\n").map { |log_line| log_line[/([a-z]+) message/, 1] }
-    end
-
     context 'at default level' do
       it 'respects log level debug' do
         log_at_every_level(default_logger)
