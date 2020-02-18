@@ -33,9 +33,9 @@ describe ContextualLogger::LoggerWithContext do
       context "context caching" do
         it "caches contexts to avoid merging over and over" do
           subject.fatal("fatal message", log_source: "frontend")
-          expect(subject.instance_variable_get(:@merged_context_cache).keys).to eq([{ log_source: "frontend"} ])
+          expect(subject.instance_variable_get(:@merged_context_cache).keys).to eq([{ log_source: "frontend" }])
           subject.fatal("fatal message", log_source: "redis_client")
-          expect(subject.instance_variable_get(:@merged_context_cache).keys).to eq([{ log_source: "frontend"}, { log_source: "redis_client"} ])
+          expect(subject.instance_variable_get(:@merged_context_cache).keys).to eq([{ log_source: "frontend" }, { log_source: "redis_client" }])
           4998.times do |i|
             subject.fatal("fatal message", log_source: "gem #{i}")
           end
