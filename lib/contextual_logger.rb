@@ -20,12 +20,15 @@ module ContextualLogger
       context_handler = Context::Handler.new(current_context_for_thread.deep_merge(context))
       context_handler.set!
       if block_given?
-        yield
+        begin
+          yield
+        ensure
+          context_handler.reset!
+        end
       else
-        context_handler # JEB, is this actually useful? The set! and reset! wouldn't mean anything, so it would just be calling Context::Handler.new, right? -Colin
+        # If no block given, the context handler is returned to the caller so they can handle reset! themselves.
+        context_handler
       end
-    ensure
-      context_handler.reset! if block_given?
     end
 
     def current_context_for_thread
