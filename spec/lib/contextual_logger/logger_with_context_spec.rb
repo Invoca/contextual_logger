@@ -30,6 +30,21 @@ describe ContextualLogger::LoggerWithContext do
         expect(log_stream.string).to include('{"log_source":"frontend","message":"fatal message","severity":"FATAL",')
       end
 
+      context "context caching" do
+        it "caches contexts to avoid merging over and over" do
+          subject.fatal("fatal message", log_source: "frontend")
+          expect(subject.instance_variable_get(:@merged_context_cache).keys).to eq([{ log_source: "frontend"} ])
+          subject.fatal("fatal message", log_source: "redis_client")
+          expect(subject.instance_variable_get(:@merged_context_cache).keys).to eq([{ log_source: "frontend"}, { log_source: "redis_client"} ])
+          4998.times do |i|
+            subject.fatal("fatal message", log_source: "gem #{i}")
+          end
+          expect(subject.instance_variable_get(:@merged_context_cache).size).to eq(5000)
+          subject.fatal("fatal message", log_source: "gem 5000")
+          expect(subject.instance_variable_get(:@merged_context_cache).size).to eq(1)
+        end
+      end
+
       context "log level changes" do
         it "defaults to the base log level" do
           expect(subject.level).to eq(Logger::Severity::FATAL)

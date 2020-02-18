@@ -17,7 +17,7 @@ module ContextualLogger
     end
 
     def write_entry_to_log(severity, timestamp, progname, message, context)
-      if @merged_context_cache.size > 5000 # keep this cache memory use finite
+      if @merged_context_cache.size >= 5000 # keep this cache memory use finite
         @merged_context_cache = {}
       end
       merged_context = @merged_context_cache[context] ||= @context.deep_merge(context)
