@@ -278,4 +278,24 @@ describe ContextualLogger do
       end
     end
   end
+
+  describe 'add' do
+    let(:log_stream) { StringIO.new }
+    let(:logger) { ContextualLogger.new(Logger.new(log_stream, level: Logger::Severity::DEBUG)) }
+
+    it "preserves the Logger interface with message only" do
+      expect(logger.add(Logger::Severity::INFO, "info message")).to eq(true)
+      expect(log_stream.string).to match(/\{"message":"info message","severity":"INFO","timestamp":".*"\}/)
+    end
+
+    it "preserves the Logger interface with nil message & block" do
+      expect(logger.add(Logger::Severity::INFO, nil) { "info message" }).to eq(true)
+      expect(log_stream.string).to match(/\{"message":"info message","severity":"INFO","timestamp":".*"\}/)
+    end
+
+    it "preserves the Logger interface with nil message & message in progname spot" do
+      expect(logger.add(Logger::Severity::INFO, nil, "info message")).to eq(true)
+      expect(log_stream.string).to match(/\{"message":"info message","severity":"INFO","timestamp":".*"\}/)
+    end
+  end
 end

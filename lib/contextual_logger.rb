@@ -35,63 +35,59 @@ module ContextualLogger
       Context::Handler.current_context
     end
 
-    def debug(message = nil, extra_context = {})
-      add_if_enabled(Logger::Severity::DEBUG, message || yield, extra_context: extra_context)
+    def debug(message = nil, context = {})
+      add_if_enabled(Logger::Severity::DEBUG, message || yield, context: context)
     end
 
-    def info(message = nil, extra_context = {})
-      add_if_enabled(Logger::Severity::INFO, message || yield, extra_context: extra_context)
+    def info(message = nil, context = {})
+      add_if_enabled(Logger::Severity::INFO, message || yield, context: context)
     end
 
-    def warn(message = nil, extra_context = {})
-      add_if_enabled(Logger::Severity::WARN, message || yield, extra_context: extra_context)
+    def warn(message = nil, context = {})
+      add_if_enabled(Logger::Severity::WARN, message || yield, context: context)
     end
 
-    def error(message = nil, extra_context = {})
-      add_if_enabled(Logger::Severity::ERROR, message || yield, extra_context: extra_context)
+    def error(message = nil, context = {})
+      add_if_enabled(Logger::Severity::ERROR, message || yield, context: context)
     end
 
-    def fatal(message = nil, extra_context = {})
-      add_if_enabled(Logger::Severity::FATAL, message || yield, extra_context: extra_context)
+    def fatal(message = nil, context = {})
+      add_if_enabled(Logger::Severity::FATAL, message || yield, context: context)
     end
 
-    def unknown(message = nil, extra_context = {})
-      add_if_enabled(Logger::Severity::UNKNOWN, message || yield, extra_context: extra_context)
+    def unknown(message = nil, context = {})
+      add_if_enabled(Logger::Severity::UNKNOWN, message || yield, context: context)
     end
 
     def log_level_enabled?(severity)
       severity >= level
     end
 
-    def add_if_enabled(severity, message, extra_context:)
+    def add_if_enabled(severity, message, context:)
       if log_level_enabled?(severity)
-        add(severity, message: message, progname: @progname, extra_context: extra_context)
+        write_entry_to_log(severity, Time.now, @progname, message, context: current_context_for_thread.deep_merge(context))
       end
       true
     end
 
-    def add(severity, message:, progname:, extra_context:)
-      write_entry_to_log(severity, Time.now, progname, message, current_context_for_thread.deep_merge(extra_context))
-    end
-
-    def write_entry_to_log(severity, timestamp, progname, message, context)
-      @logdev&.write(format_message(format_severity(severity), timestamp, progname, message, context))
+    def write_entry_to_log(severity, timestamp, progname, message, context:)
+      @logdev&.write(format_message(format_severity(severity), timestamp, progname, message, context: context))
     end
 
     private
 
-    def format_message(severity, timestamp, progname, message, context)
-      message_with_context = message_with_context(context, message, severity, timestamp, progname)
+    def format_message(severity, timestamp, progname, message, context: {})
+      message_with_context_hash = message_with_context(context, message, severity, timestamp, progname)
 
       if @formatter
-        @formatter.call(severity, timestamp, progname, message_with_context)
+        @formatter.call(severity, timestamp, progname, message_with_context_hash)
       else
-        "#{message_with_context.to_json}\n"
+        "#{message_with_context_hash.to_json}\n"
       end
     end
 
-    def message_with_context(context, message, severity, timestamp, progname)
-      extra_context =
+    def message_with_context(extra_context, message, severity, timestamp, progname)
+      context =
         {
           message: message,
           severity: severity,
