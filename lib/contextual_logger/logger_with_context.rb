@@ -24,12 +24,12 @@ module ContextualLogger
       @override_level = override_level
     end
 
-    def write_entry_to_log(severity, timestamp, progname, message, context)
+    def write_entry_to_log(severity, timestamp, progname, message, context:)
       if @merged_context_cache.size >= 5000 # keep this cache memory use finite
         @merged_context_cache = {}
       end
       merged_context = @merged_context_cache[context] ||= @context.deep_merge(context)
-      @logger.write_entry_to_log(severity, timestamp, progname, message, merged_context)
+      @logger.write_entry_to_log(severity, timestamp, progname, message, context: merged_context)
     end
 
     class << self
