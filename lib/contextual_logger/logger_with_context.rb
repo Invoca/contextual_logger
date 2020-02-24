@@ -10,6 +10,7 @@ module ContextualLogger
     attr_reader :logger, :override_level, :context
 
     def initialize(logger, context, level: nil)
+      logger.is_a?(LoggerMixin) or raise ArgumentError, "logger must include ContextualLogger::LoggerMixin (got #{logger.inspect})"
       @logger = logger
       @override_level = level
       @context = context
