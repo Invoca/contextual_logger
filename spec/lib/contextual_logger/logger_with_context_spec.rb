@@ -31,17 +31,17 @@ describe ContextualLogger::LoggerWithContext do
       end
 
       context "context caching" do
-        it "caches contexts to avoid merging over and over" do
+        it "caches contexts to avoid merging over and over (but caps the cache size)" do
           subject.fatal("fatal message", log_source: "frontend")
           expect(subject.instance_variable_get(:@merged_context_cache).keys).to eq([{ log_source: "frontend" }])
           subject.fatal("fatal message", log_source: "redis_client")
           expect(subject.instance_variable_get(:@merged_context_cache).keys).to eq([{ log_source: "frontend" }, { log_source: "redis_client" }])
-          4998.times do |i|
+          998.times do |i|
             subject.fatal("fatal message", log_source: "gem #{i}")
           end
-          expect(subject.instance_variable_get(:@merged_context_cache).size).to eq(5000)
-          subject.fatal("fatal message", log_source: "gem 5000")
-          expect(subject.instance_variable_get(:@merged_context_cache).size).to eq(1)
+          expect(subject.instance_variable_get(:@merged_context_cache).size).to eq(1000)
+          subject.fatal("fatal message", log_source: "gem 1000")
+          expect(subject.instance_variable_get(:@merged_context_cache).size).to eq(1000)
         end
       end
 
