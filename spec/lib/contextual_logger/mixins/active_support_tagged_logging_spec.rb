@@ -17,10 +17,10 @@ describe 'ContextualLogger::Overrides::ActiveSupport::TaggedLogging::Formatter' 
   it 'should log log_tags as additional context' do
     @logger.push_tags('test')
     expected_log_line = {
-      service: 'test_service',
       message: 'this is a test',
       severity: 'DEBUG',
       timestamp: Time.now,
+      service: 'test_service',
       log_tags: 'test'
     }.to_json
 

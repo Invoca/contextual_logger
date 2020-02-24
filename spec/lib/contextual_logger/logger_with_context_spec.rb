@@ -17,17 +17,17 @@ describe ContextualLogger::LoggerWithContext do
 
       it "adds context" do
         subject.fatal("fatal message")
-        expect(log_stream.string).to include('{"log_source":"redis_client","message":"fatal message","severity":"FATAL",')
+        expect(log_stream.string).to match(/\{"message":"fatal message","severity":"FATAL","timestamp":".*","log_source":"redis_client"\}/)
       end
 
       it "merges context" do
         subject.fatal("fatal message", call_id: "234-123")
-        expect(log_stream.string).to include('{"log_source":"redis_client","call_id":"234-123","message":"fatal message","severity":"FATAL",')
+        expect(log_stream.string).to match(/\{"message":"fatal message","severity":"FATAL","timestamp":".*","log_source":"redis_client","call_id":"234-123"\}/)
       end
 
       it "allows context to be overridden" do
         subject.fatal("fatal message", log_source: "frontend")
-        expect(log_stream.string).to include('{"log_source":"frontend","message":"fatal message","severity":"FATAL",')
+        expect(log_stream.string).to match(/\{"message":"fatal message","severity":"FATAL","timestamp":".*","log_source":"frontend"\}/)
       end
 
       context "context caching" do
@@ -92,7 +92,7 @@ describe ContextualLogger::LoggerWithContext do
 
         it "creates a new logger_with_context using that log_source" do
           subject.fatal("fatal message")
-          expect(log_stream.string).to include('{"log_source":"frontend","message":"fatal message","severity":"FATAL",')
+          expect(log_stream.string).to match(/\{"message":"fatal message","severity":"FATAL","timestamp":".*","log_source":"frontend"\}/)
         end
       end
     end
