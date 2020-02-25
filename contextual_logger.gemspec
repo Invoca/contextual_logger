@@ -11,7 +11,10 @@ Gem::Specification.new do |spec|
   spec.email       = 'jebentier@invoca.com'
   spec.files       = Dir['lib/**/*']
   spec.homepage    = 'https://rubygems.org/gems/contextual_logger'
-  spec.metadata    = { 'source_code_uri' => 'https://github.com/Invoca/contextual_logger' }
+  spec.metadata    = {
+    "source_code_uri"   => "https://github.com/Invoca/process_settings",
+    "allowed_push_host" => "https://rubygems.org"
+  }
 
   spec.add_runtime_dependency 'json'
   spec.add_runtime_dependency 'activesupport'
