@@ -101,6 +101,14 @@ describe ContextualLogger::LoggerWithContext do
         subject.fatal("fatal message")
         expect(log_stream.string).to match(/\{"message":"fatal message","severity":"FATAL","timestamp":".*","log_source":"frontend"\}/)
       end
+
+      it "creates a new logger_with_context using that log_source and level:" do
+        logger = ContextualLogger::LoggerWithContext.for_log_source(base_logger, "frontend", level: Logger::Severity::FATAL)
+        logger.fatal("fatal message")
+        logger.error("error message")
+        expect(log_stream.string).to match(/\{"message":"fatal message","severity":"FATAL","timestamp":".*","log_source":"frontend"\}/)
+        expect(log_stream.string).to_not match(/error message/)
+      end
     end
   end
 end

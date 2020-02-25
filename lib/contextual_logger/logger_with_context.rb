@@ -37,8 +37,8 @@ module ContextualLogger
     end
 
     class << self
-      def for_log_source(logger, log_source)
-        new(logger, log_source: log_source)
+      def for_log_source(logger, log_source, level: nil)
+        new(logger, { log_source: log_source }, level: level)
       end
     end
   end
