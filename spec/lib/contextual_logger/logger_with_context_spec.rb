@@ -84,7 +84,7 @@ describe ContextualLogger::LoggerWithContext do
           expect(log_message_levels).to eq(["warn", "error", "fatal", "unknown"])
         end
       end
-      Logger
+
       context "with string log level" do
         it "allows creating" do
           logger_with_context = ContextualLogger::LoggerWithContext.new(base_logger, context, level: 'INFO')

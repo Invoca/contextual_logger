@@ -65,6 +65,7 @@ module ContextualLogger
 
     def add_if_enabled(severity, message, context:)
       if log_level_enabled?(severity)
+        @progname ||= nil
         write_entry_to_log(severity, Time.now, @progname, message, context: current_context_for_thread.deep_merge(context))
       end
       true
