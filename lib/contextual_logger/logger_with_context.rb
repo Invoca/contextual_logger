@@ -12,7 +12,7 @@ module ContextualLogger
     def initialize(logger, context, level: nil)
       logger.is_a?(LoggerMixin) or raise ArgumentError, "logger must include ContextualLogger::LoggerMixin (got #{logger.inspect})"
       @logger = logger
-      @override_level = level
+      self.level = level
       @context = context
       @merged_context_cache = {}  # so we don't have to merge every time
     end
@@ -22,7 +22,27 @@ module ContextualLogger
     end
 
     def level=(override_level)
-      @override_level = override_level
+      @override_level =
+        if (Logger::Severity::DEBUG..Logger::Severity::UNKNOWN).include?(override_level) || override_level.nil?
+          override_level
+        else
+          case override_level.to_s.downcase
+          when 'debug'
+            Logger::Severity::DEBUG
+          when 'info'
+            Logger::Severity::INFO
+          when 'warn'
+            Logger::Severity::WARN
+          when 'error'
+            Logger::Severity::ERROR
+          when 'fatal'
+            Logger::Severity::FATAL
+          when 'unknown'
+            Logger::Severity::UNKNOWN
+          else
+            raise ArgumentError, "invalid log level: #{override_level.inspect}"
+          end
+        end
     end
 
     def write_entry_to_log(severity, timestamp, progname, message, context:)

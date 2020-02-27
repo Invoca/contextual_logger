@@ -84,6 +84,19 @@ describe ContextualLogger::LoggerWithContext do
           expect(log_message_levels).to eq(["warn", "error", "fatal", "unknown"])
         end
       end
+      Logger
+      context "with string log level" do
+        it "allows creating" do
+          logger_with_context = ContextualLogger::LoggerWithContext.new(base_logger, context, level: 'INFO')
+          expect(logger_with_context.level).to eq(Logger::Severity::INFO)
+        end
+
+        it "allows assignment" do
+          logger_with_context = ContextualLogger::LoggerWithContext.new(base_logger, context)
+          logger_with_context.level = 'ERROR'
+          expect(logger_with_context.level).to eq(Logger::Severity::ERROR)
+        end
+      end
     end
 
     context "when base logger doesn't include LoggerMixin" do
