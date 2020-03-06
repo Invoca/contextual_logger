@@ -307,7 +307,7 @@ describe ContextualLogger do
     "ERROR"   => Logger::Severity::ERROR,
     "FATAL"   => Logger::Severity::FATAL,
     "UNKNOWN" => Logger::Severity::UNKNOWN
-  }
+  }.freeze
 
   describe 'module methods' do
     describe "normalize_log_level" do
