@@ -22,27 +22,7 @@ module ContextualLogger
     end
 
     def level=(override_level)
-      @override_level =
-        if (Logger::Severity::DEBUG..Logger::Severity::UNKNOWN).include?(override_level) || override_level.nil?
-          override_level
-        else
-          case override_level.to_s.downcase
-          when 'debug'
-            Logger::Severity::DEBUG
-          when 'info'
-            Logger::Severity::INFO
-          when 'warn'
-            Logger::Severity::WARN
-          when 'error'
-            Logger::Severity::ERROR
-          when 'fatal'
-            Logger::Severity::FATAL
-          when 'unknown'
-            Logger::Severity::UNKNOWN
-          else
-            raise ArgumentError, "invalid log level: #{override_level.inspect}"
-          end
-        end
+      @override_level = ContextualLogger.normalize_log_level(override_level)
     end
 
     def write_entry_to_log(severity, timestamp, progname, message, context:)

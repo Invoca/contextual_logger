@@ -9,6 +9,29 @@ module ContextualLogger
     def new(logger)
       logger.extend(LoggerMixin)
     end
+
+    def normalize_log_level(log_level)
+      if (Logger::Severity::DEBUG..Logger::Severity::UNKNOWN).include?(log_level) || log_level.nil?
+        log_level
+      else
+        case log_level.to_s.downcase
+        when 'debug'
+          Logger::Severity::DEBUG
+        when 'info'
+          Logger::Severity::INFO
+        when 'warn'
+          Logger::Severity::WARN
+        when 'error'
+          Logger::Severity::ERROR
+        when 'fatal'
+          Logger::Severity::FATAL
+        when 'unknown'
+          Logger::Severity::UNKNOWN
+        else
+          raise ArgumentError, "invalid log level: #{log_level.inspect}"
+        end
+      end
+    end
   end
 
   module LoggerMixin

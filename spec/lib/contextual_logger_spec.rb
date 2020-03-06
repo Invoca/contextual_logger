@@ -298,4 +298,51 @@ describe ContextualLogger do
       expect(log_stream.string).to match(/\{"message":"info message","severity":"INFO","timestamp":".*"\}/)
     end
   end
+
+  LOG_LEVEL_STRINGS_TO_CONSTANTS =
+  {
+    "DEBUG"   => Logger::Severity::DEBUG,
+    "INFO"    => Logger::Severity::INFO,
+    "WARN"    => Logger::Severity::WARN,
+    "ERROR"   => Logger::Severity::ERROR,
+    "FATAL"   => Logger::Severity::FATAL,
+    "UNKNOWN" => Logger::Severity::UNKNOWN
+  }
+
+  describe 'module methods' do
+    describe "normalize_log_level" do
+      it "accepts Severity constants" do
+        LOG_LEVEL_STRINGS_TO_CONSTANTS.each do |_uppercase_string_level, constant_level|
+          expect(ContextualLogger.normalize_log_level(constant_level)).to eq(constant_level)
+        end
+      end
+
+      it "accepts uppercase strings" do
+        LOG_LEVEL_STRINGS_TO_CONSTANTS.each do |uppercase_string_level, constant_level|
+          expect(ContextualLogger.normalize_log_level(uppercase_string_level)).to eq(constant_level)
+        end
+      end
+
+      it "accepts uppercase symbols" do
+        LOG_LEVEL_STRINGS_TO_CONSTANTS.each do |uppercase_string_level, constant_level|
+          uppercase_symbol_level = uppercase_string_level.to_sym
+          expect(ContextualLogger.normalize_log_level(uppercase_symbol_level)).to eq(constant_level)
+        end
+      end
+
+      it "accepts lowercase strings" do
+        LOG_LEVEL_STRINGS_TO_CONSTANTS.each do |uppercase_string_level, constant_level|
+          lowercase_string_level = uppercase_string_level.downcase
+          expect(ContextualLogger.normalize_log_level(lowercase_string_level)).to eq(constant_level)
+        end
+      end
+
+      it "accepts lowercase symbols" do
+        LOG_LEVEL_STRINGS_TO_CONSTANTS.each do |uppercase_string_level, constant_level|
+          lowercase_symbol_level = uppercase_string_level.downcase.to_sym
+          expect(ContextualLogger.normalize_log_level(lowercase_symbol_level)).to eq(constant_level)
+        end
+      end
+    end
+  end
 end
