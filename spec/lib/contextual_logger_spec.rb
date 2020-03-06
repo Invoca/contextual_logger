@@ -311,6 +311,12 @@ describe ContextualLogger do
 
   describe 'module methods' do
     describe "normalize_log_level" do
+      it "raises an exception on invalid values" do
+        [nil, "", "ABC", 3.5].each do |invalid_value|
+          expect { ContextualLogger.normalize_log_level(invalid_value) }.to raise_exception(ArgumentError, /invalid log level:/), invalid_value
+        end
+      end
+
       it "accepts Severity constants" do
         LOG_LEVEL_STRINGS_TO_CONSTANTS.each do |_uppercase_string_level, constant_level|
           expect(ContextualLogger.normalize_log_level(constant_level)).to eq(constant_level)

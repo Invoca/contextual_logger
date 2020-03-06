@@ -22,7 +22,7 @@ module ContextualLogger
     end
 
     def level=(override_level)
-      @override_level = ContextualLogger.normalize_log_level(override_level)
+      @override_level = (ContextualLogger.normalize_log_level(override_level) if override_level)
     end
 
     def write_entry_to_log(severity, timestamp, progname, message, context:)

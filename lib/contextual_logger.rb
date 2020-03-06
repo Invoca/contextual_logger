@@ -11,7 +11,7 @@ module ContextualLogger
     end
 
     def normalize_log_level(log_level)
-      if (Logger::Severity::DEBUG..Logger::Severity::UNKNOWN).include?(log_level) || log_level.nil?
+      if log_level.is_a?(Integer) && (Logger::Severity::DEBUG..Logger::Severity::UNKNOWN).include?(log_level)
         log_level
       else
         case log_level.to_s.downcase
