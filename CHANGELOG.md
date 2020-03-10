@@ -4,7 +4,7 @@ Inspired by [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Note: this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.5.1.pre.1] - 2019-03-10
+## [0.5.1] - 2019-03-10 [diff](https://github.com/Invoca/contextual_logger/compare/v0.5.0...v0.5.1)
 
 ### Changed
 
@@ -16,7 +16,7 @@ Note: this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0
   `**context` argument, if present. If that argument is not present (such as with `broadcast`), Ruby will instead
   match the `**context` up to the `progname` argument.
 
-## [0.5] - 2019-03-06
+## [0.5] - 2019-03-06 [diff](https://github.com/Invoca/contextual_logger/compare/v0.4.0...v0.5.0)
 
 ### Added
  - Extracted normalize_log_level to a public class method so we can call it elsewhere where we allow log_level to be
