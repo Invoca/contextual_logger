@@ -87,6 +87,34 @@ describe ContextualLogger do
         expect(log_message_levels).to eq(["unknown"])
       end
     end
+
+    describe 'when used with ActiveSupport::Logger.broadcast' do
+      let(:log_level) { Logger::Severity::ERROR }
+      let(:console_log_stream) { StringIO.new }
+      let(:console_logger) { Logger.new(console_log_stream) }
+      let(:broadcast_logger) { logger.extend(ActiveSupport::Logger.broadcast(console_logger)) }
+
+      it 'properly broadcasts to both logs when level-named method is called' do
+        log_at_every_level(broadcast_logger, service: 'test_service')
+        expect(log_message_levels).to eq(["error", "fatal", "unknown"])
+        # note: context lands in `progname` arg
+        expect(console_log_stream.string.gsub(/\[[^]]+\]/, '[]')).to eq(<<~EOS)
+          D, [] DEBUG -- {:service=>\"test_service\"}: debug message
+          I, []  INFO -- {:service=>\"test_service\"}: info message
+          W, []  WARN -- {:service=>\"test_service\"}: warn message
+          E, [] ERROR -- {:service=>\"test_service\"}: error message
+          F, [] FATAL -- {:service=>\"test_service\"}: fatal message
+          A, []   ANY -- {:service=>\"test_service\"}: unknown message
+        EOS
+      end
+
+      it 'properly broadcasts to both logs when add is called' do
+        broadcast_logger.add(Logger::Severity::ERROR, "error message", service: 'test_service')
+        expect(log_message_levels).to eq(["error"])
+        # note: context lands in `progname` arg
+        expect(console_log_stream.string.gsub(/\[[^]]+\]/, '[]')).to eq("E, [] ERROR -- {:service=>\"test_service\"}: error message\n")
+      end
+    end
   end
 
   describe 'inline context' do

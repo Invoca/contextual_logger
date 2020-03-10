@@ -4,13 +4,13 @@ require 'coveralls'
 Coveralls.wear!
 
 module Helpers
-  def log_at_every_level(logger)
-    logger.debug("debug message")
-    logger.info("info message")
-    logger.warn("warn message")
-    logger.error("error message")
-    logger.fatal("fatal message")
-    logger.unknown("unknown message")
+  def log_at_every_level(logger, context = {})
+    logger.debug("debug message", context)
+    logger.info("info message", context)
+    logger.warn("warn message", context)
+    logger.error("error message", context)
+    logger.fatal("fatal message", context)
+    logger.unknown("unknown message", context)
   end
 
   def log_message_levels

@@ -59,38 +59,48 @@ module ContextualLogger
     end
 
     def debug(message = nil, context = {})
-      add_if_enabled(Logger::Severity::DEBUG, message || yield, context: context)
+      add(Logger::Severity::DEBUG, message || yield, **context)
     end
 
     def info(message = nil, context = {})
-      add_if_enabled(Logger::Severity::INFO, message || yield, context: context)
+      add(Logger::Severity::INFO, message || yield, **context)
     end
 
     def warn(message = nil, context = {})
-      add_if_enabled(Logger::Severity::WARN, message || yield, context: context)
+      add(Logger::Severity::WARN, message || yield, **context)
     end
 
     def error(message = nil, context = {})
-      add_if_enabled(Logger::Severity::ERROR, message || yield, context: context)
+      add(Logger::Severity::ERROR, message || yield, **context)
     end
 
     def fatal(message = nil, context = {})
-      add_if_enabled(Logger::Severity::FATAL, message || yield, context: context)
+      add(Logger::Severity::FATAL, message || yield, **context)
     end
 
     def unknown(message = nil, context = {})
-      add_if_enabled(Logger::Severity::UNKNOWN, message || yield, context: context)
+      add(Logger::Severity::UNKNOWN, message || yield, **context)
     end
 
     def log_level_enabled?(severity)
       severity >= level
     end
 
-    def add_if_enabled(severity, message, context:)
+    def add(init_severity, message = nil, init_progname = nil, **context)   # Ruby will prefer to match hashes up to last ** argument
+      severity = init_severity || UNKNOWN
       if log_level_enabled?(severity)
-        @progname ||= nil
-        write_entry_to_log(severity, Time.now, @progname, message, context: current_context_for_thread.deep_merge(context))
+        progname = init_progname || @progname
+        if message.nil?
+          if block_given?
+            message = yield
+          else
+            message = init_progname
+            progname = @progname
+          end
+        end
+        write_entry_to_log(severity, Time.now, progname, message, context: current_context_for_thread.deep_merge(context))
       end
+
       true
     end
 
