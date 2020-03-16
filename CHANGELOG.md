@@ -8,7 +8,7 @@ Note: this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0
 
 ### Changed
 
-- Refactored debug, info, error... etc methods to call the base class `add(severity, message, progrname)` method since
+- Fixed Rails Server logging to STDOUT: Refactored debug, info, error... etc methods to call the base class `add(severity, message, progrname)` method since
   `ActiveSupport::Logger.broadcast` reimplements that to broadcast to multiple logger instances, such as
   `Rails::Server` logging to `STDOUT` + `development.log`.
   Note that the base class `add()` does not have a `context` hash like our `add()` does.
