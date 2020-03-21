@@ -62,27 +62,27 @@ module ContextualLogger
     end
 
     def debug(message = nil, context = {})
-      add(Logger::Severity::DEBUG, message || yield, **context)
+      add(Logger::Severity::DEBUG, message.nil? && block_given? ? yield : message, **context)
     end
 
     def info(message = nil, context = {})
-      add(Logger::Severity::INFO, message || yield, **context)
+      add(Logger::Severity::INFO, message.nil? && block_given? ? yield : message, **context)
     end
 
     def warn(message = nil, context = {})
-      add(Logger::Severity::WARN, message || yield, **context)
+      add(Logger::Severity::WARN, message.nil? && block_given? ? yield : message, **context)
     end
 
     def error(message = nil, context = {})
-      add(Logger::Severity::ERROR, message || yield, **context)
+      add(Logger::Severity::ERROR, message.nil? && block_given? ? yield : message, **context)
     end
 
     def fatal(message = nil, context = {})
-      add(Logger::Severity::FATAL, message || yield, **context)
+      add(Logger::Severity::FATAL, message.nil? && block_given? ? yield : message, **context)
     end
 
     def unknown(message = nil, context = {})
-      add(Logger::Severity::UNKNOWN, message || yield, **context)
+      add(Logger::Severity::UNKNOWN, message.nil? && block_given? ? yield : message, **context)
     end
 
     def log_level_enabled?(severity)
