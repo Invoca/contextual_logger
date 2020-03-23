@@ -33,6 +33,15 @@ module ContextualLogger
         end
       end
     end
+
+    def normalize_message(message)
+      case message
+      when String
+        message
+      else
+        message.inspect
+      end
+    end
   end
 
   module LoggerMixin
@@ -134,7 +143,7 @@ module ContextualLogger
     def message_hash_with_context(severity, timestamp, progname, message, context:)
       message_hash =
         {
-          message:   message,
+          message:   ContextualLogger.normalize_message(message),
           severity:  severity,
           timestamp: timestamp
         }

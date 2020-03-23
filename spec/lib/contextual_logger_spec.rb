@@ -123,12 +123,12 @@ describe ContextualLogger do
         log_message_at_every_level(logger, nil)
 
         expect(log_stream.string.gsub(/"timestamp":"[^"]+"/, '<time>')).to eq(<<~EOS)
-          {"message":null,"severity":"DEBUG",<time>}
-          {"message":null,"severity":"INFO",<time>}
-          {"message":null,"severity":"WARN",<time>}
-          {"message":null,"severity":"ERROR",<time>}
-          {"message":null,"severity":"FATAL",<time>}
-          {"message":null,"severity":"ANY",<time>}
+          {"message":"nil","severity":"DEBUG",<time>}
+          {"message":"nil","severity":"INFO",<time>}
+          {"message":"nil","severity":"WARN",<time>}
+          {"message":"nil","severity":"ERROR",<time>}
+          {"message":"nil","severity":"FATAL",<time>}
+          {"message":"nil","severity":"ANY",<time>}
         EOS
       end
     end
@@ -139,12 +139,12 @@ describe ContextualLogger do
         log_message_at_every_level(logger, false)
 
         expect(log_stream.string.gsub(/"timestamp":"[^"]+"/, '"timestamp":"<time>"')).to eq(<<~EOS)
-          {"message":false,"severity":"DEBUG","timestamp":"<time>"}
-          {"message":false,"severity":"INFO","timestamp":"<time>"}
-          {"message":false,"severity":"WARN","timestamp":"<time>"}
-          {"message":false,"severity":"ERROR","timestamp":"<time>"}
-          {"message":false,"severity":"FATAL","timestamp":"<time>"}
-          {"message":false,"severity":"ANY","timestamp":"<time>"}
+          {"message":"false","severity":"DEBUG","timestamp":"<time>"}
+          {"message":"false","severity":"INFO","timestamp":"<time>"}
+          {"message":"false","severity":"WARN","timestamp":"<time>"}
+          {"message":"false","severity":"ERROR","timestamp":"<time>"}
+          {"message":"false","severity":"FATAL","timestamp":"<time>"}
+          {"message":"false","severity":"ANY","timestamp":"<time>"}
         EOS
       end
     end
@@ -408,6 +408,44 @@ describe ContextualLogger do
         LOG_LEVEL_STRINGS_TO_CONSTANTS.each do |uppercase_string_level, constant_level|
           lowercase_symbol_level = uppercase_string_level.downcase.to_sym
           expect(ContextualLogger.normalize_log_level(lowercase_symbol_level)).to eq(constant_level)
+        end
+      end
+    end
+
+    describe "normalize_message" do
+      class CustomInspect
+        def inspect
+          "<custom>"
+        end
+      end
+
+      describe 'with nil' do
+        it "returns 'nil'" do
+          expect(ContextualLogger.normalize_message(nil)).to eq("nil")
+        end
+      end
+
+      describe 'with false' do
+        it "returns 'false'" do
+          expect(ContextualLogger.normalize_message(false)).to eq("false")
+        end
+      end
+
+      describe 'with a symbol' do
+        it "returns :symbol" do
+          expect(ContextualLogger.normalize_message(:symbol)).to eq(":symbol")
+        end
+      end
+
+      describe 'with a custom #inspect' do
+        it "returns .inspect" do
+          expect(ContextualLogger.normalize_message(CustomInspect.new)).to eq("<custom>")
+        end
+      end
+
+      describe 'with an Exception' do
+        it "returns .inspect (skipping the backtrace)" do
+          expect(ContextualLogger.normalize_message(ArgumentError.new("err"))).to eq("#<ArgumentError: err>")
         end
       end
     end
