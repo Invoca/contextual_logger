@@ -50,6 +50,13 @@ If you'd like to set a global context for your process, you can do the following
 contextual_logger.global_context = { service_name: 'test_service' }
 ```
 
+#### Redaction
+In order to register sensitive strings to the logger for redaction to occur, do the following:
+```ruby
+contextual_logger.redactor.match('some_sensitive_data')
+```
+This string will then be replaced with `<redacted>` whenever the logger is about to log to the file.
+
 ### Overrides
 #### ActiveSupport::TaggedLogging
 ActiveSupport's TaggedLogging extension adds the ability for tags to be prepended onto logs in an easy to use way.  This is a very
