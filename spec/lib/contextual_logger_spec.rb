@@ -388,14 +388,14 @@ describe ContextualLogger do
     end
 
     describe 'with sensitive data in the message' do
-      let(:expected_log_hash) {
+      let(:expected_log_hash) do
         {
           severity: 'DEBUG',
           service: 'test_service',
           message: 'this is a test with <redacted>',
           timestamp: Time.now
         }
-      }
+      end
 
       it 'replaces sensitive data with <redacted>' do
         expect_log_line_to_be_written(expected_log_hash.to_json)
@@ -404,7 +404,7 @@ describe ContextualLogger do
     end
 
     describe 'with sensitive data in the context' do
-      let(:expected_log_hash) {
+      let(:expected_log_hash) do
         {
           severity: 'DEBUG',
           service: 'test_service',
@@ -412,7 +412,7 @@ describe ContextualLogger do
           password: '<redacted>',
           timestamp: Time.now
         }
-      }
+      end
 
       it 'replaces sensitive data with <redacted>' do
         expect_log_line_to_be_written(expected_log_hash.to_json)
