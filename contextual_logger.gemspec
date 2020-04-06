@@ -1,8 +1,12 @@
 # frozen_string_literal: true
 
+lib = File.expand_path("../lib", __FILE__)
+$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
+require "contextual_logger/version"
+
 Gem::Specification.new do |spec|
   spec.name        = 'contextual_logger'
-  spec.version     = '0.5.1'
+  spec.version     = ContextualLogger::VERSION
   spec.license     = 'MIT'
   spec.summary     = 'Add context to your logger'
   spec.description = 'A way to add context to the logs you have'
