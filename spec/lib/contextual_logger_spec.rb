@@ -384,7 +384,7 @@ describe ContextualLogger do
     let(:sensitive_data) { 'sensitive_string_123' }
 
     before(:each) do
-      logger.redactor.match(sensitive_data)
+      logger.register_secret(sensitive_data)
     end
 
     describe 'with sensitive data in the message' do

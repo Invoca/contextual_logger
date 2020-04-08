@@ -50,11 +50,12 @@ If you'd like to set a global context for your process, you can do the following
 contextual_logger.global_context = { service_name: 'test_service' }
 ```
 
-#### Redaction
+### Redaction
+#### Registering a Secret
 In order to register sensitive strings to the logger for redaction to occur, do the following:
 ```ruby
 password = "ffbba9b905c0a549b48f48894ad7aa9b7bd7c06c"
-contextual_logger.redactor.match(password)
+contextual_logger.register_secret(password)
 
 contextual_logger.info("Request sent with body { 'username': 'test_user', 'password': 'ffbba9b905c0a549b48f48894ad7aa9b7bd7c06c' } }")
 ```

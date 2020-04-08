@@ -36,9 +36,7 @@ module ContextualLogger
   end
 
   module LoggerMixin
-    def redactor
-      @redactor ||= Redactor.new
-    end
+    delegate :register_secret, to: :redactor
 
     def global_context=(context)
       Context::Handler.new(context).set!
@@ -118,6 +116,10 @@ module ContextualLogger
     end
 
     private
+
+    def redactor
+      @redactor ||= Redactor.new
+    end
 
     def format_message(severity, timestamp, progname, message, context: {})
       message_hash = message_hash_with_context(severity, timestamp, progname, message, context: context)
