@@ -53,9 +53,15 @@ contextual_logger.global_context = { service_name: 'test_service' }
 #### Redaction
 In order to register sensitive strings to the logger for redaction to occur, do the following:
 ```ruby
-contextual_logger.redactor.match('some_sensitive_data')
+password = "ffbba9b905c0a549b48f48894ad7aa9b7bd7c06c"
+contextual_logger.redactor.match(password)
+
+contextual_logger.info("Request sent with body { 'username': 'test_user', 'password': 'ffbba9b905c0a549b48f48894ad7aa9b7bd7c06c' } }")
 ```
-This string will then be replaced with `<redacted>` whenever the logger is about to log to the file.
+The above will produce the resulting log line:
+```
+03/10/20 12:22:05.769 INFO Request sent with body { 'username': 'test_user', 'password': '<redacted>' }
+```
 
 ### Overrides
 #### ActiveSupport::TaggedLogging
