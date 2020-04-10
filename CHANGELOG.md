@@ -6,6 +6,15 @@ Note: this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0
 ## [0.6.0] - Unreleased
 ### Added
 - The ability to redact sensitive data from log entries by registering the sensitive strings ahead of time with the logger
+- `ContextualLogger#normalize_message` as a general logging helper method to normalize any message to string format.
+
+### Changed
+- Restored ::Logger's ability to log non-string messages like `nil` or `false`, in case there's a gem
+  we use someday that depends on that.
+
+- JSON logging now logs all messages as strings, by calling `normalize_message`, above.
+  Previously, messages were converted by `.to_json`, so `nil` was logged as JSON `null`; now it is logged as the string `"nil"`.
+  Similarly, `false` was logged as JSON `false`; now it is logged as the string `"false"`.
 
 ## [0.5.1] - 2020-03-10
 ### Changed

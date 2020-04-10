@@ -13,6 +13,15 @@ module Helpers
     logger.unknown("unknown message", context)
   end
 
+  def log_message_at_every_level(logger, message, context = {})
+    logger.debug(message, context)
+    logger.info(message, context)
+    logger.warn(message, context)
+    logger.error(message, context)
+    logger.fatal(message, context)
+    logger.unknown(message, context)
+  end
+
   def log_message_levels
     log_stream.string.split("\n").map { |log_line| log_line[/([a-z]+) message/, 1] }
   end

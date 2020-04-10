@@ -21,70 +21,71 @@ describe ContextualLogger do
 
   it { is_expected.to respond_to(:with_context) }
 
-  context 'log_level' do
+  context 'with logger writing to log_stream' do
     let(:log_stream) { StringIO.new }
-    let(:default_logger) { ContextualLogger.new(Logger.new(log_stream)) }
     let(:log_level) { Logger::Severity::DEBUG }
     let(:logger) { ContextualLogger.new(Logger.new(log_stream, level: log_level)) }
 
-    context 'at default level' do
-      it 'respects log level debug' do
-        log_at_every_level(default_logger)
-        expect(log_message_levels).to eq(["debug", "info", "warn", "error", "fatal", "unknown"])
+    describe 'log level' do
+      context 'at default level' do
+        it 'respects log level debug' do
+          log_at_every_level(logger)
+          expect(log_message_levels).to eq(["debug", "info", "warn", "error", "fatal", "unknown"])
+        end
       end
-    end
 
-    context 'at level debug' do
-      let(:log_level) { Logger::Severity::DEBUG }
+      context 'at level debug' do
+        let(:log_level) { Logger::Severity::DEBUG }
 
-      it 'respects log level' do
-        log_at_every_level(logger)
-        expect(log_message_levels).to eq(["debug", "info", "warn", "error", "fatal", "unknown"])
+        it 'respects log level' do
+          log_at_every_level(logger)
+          expect(log_message_levels).to eq(["debug", "info", "warn", "error", "fatal", "unknown"])
+        end
       end
-    end
 
-    context 'at level info' do
-      let(:log_level) { Logger::Severity::INFO }
+      context 'at level info' do
+        let(:log_level) { Logger::Severity::INFO }
 
-      it 'respects log level' do
-        log_at_every_level(logger)
-        expect(log_message_levels).to eq(["info", "warn", "error", "fatal", "unknown"])
+        it 'respects log level' do
+          log_at_every_level(logger)
+          expect(log_message_levels).to eq(["info", "warn", "error", "fatal", "unknown"])
+        end
       end
-    end
 
-    context 'at level warn' do
-      let(:log_level) { Logger::Severity::WARN }
+      context 'at level warn' do
+        let(:log_level) { Logger::Severity::WARN }
 
-      it 'respects log level' do
-        log_at_every_level(logger)
-        expect(log_message_levels).to eq(["warn", "error", "fatal", "unknown"])
+        it 'respects log level' do
+          log_at_every_level(logger)
+          expect(log_message_levels).to eq(["warn", "error", "fatal", "unknown"])
+        end
       end
-    end
 
-    context 'at level error' do
-      let(:log_level) { Logger::Severity::ERROR }
+      context 'at level error' do
+        let(:log_level) { Logger::Severity::ERROR }
 
-      it 'respects log level' do
-        log_at_every_level(logger)
-        expect(log_message_levels).to eq(["error", "fatal", "unknown"])
+        it 'respects log level' do
+          log_at_every_level(logger)
+          expect(log_message_levels).to eq(["error", "fatal", "unknown"])
+        end
       end
-    end
 
-    context 'at level fatal' do
-      let(:log_level) { Logger::Severity::FATAL }
+      context 'at level fatal' do
+        let(:log_level) { Logger::Severity::FATAL }
 
-      it 'respects log level' do
-        log_at_every_level(logger)
-        expect(log_message_levels).to eq(["fatal", "unknown"])
+        it 'respects log level' do
+          log_at_every_level(logger)
+          expect(log_message_levels).to eq(["fatal", "unknown"])
+        end
       end
-    end
 
-    context 'at level unknown' do
-      let(:log_level) { Logger::Severity::UNKNOWN }
+      context 'at level unknown' do
+        let(:log_level) { Logger::Severity::UNKNOWN }
 
-      it 'respects log level' do
-        log_at_every_level(logger)
-        expect(log_message_levels).to eq(["unknown"])
+        it 'respects log level' do
+          log_at_every_level(logger)
+          expect(log_message_levels).to eq(["unknown"])
+        end
       end
     end
 
@@ -113,6 +114,38 @@ describe ContextualLogger do
         expect(log_message_levels).to eq(["error"])
         # note: context lands in `progname` arg
         expect(console_log_stream.string.gsub(/\[[^]]+\]/, '[]')).to eq("E, [] ERROR -- {:service=>\"test_service\"}: error message\n")
+      end
+    end
+
+    describe 'with nil message' do
+      it "logs null" do
+        logger.level = Logger::Severity::DEBUG
+        log_message_at_every_level(logger, nil)
+
+        expect(log_stream.string.gsub(/"timestamp":"[^"]+"/, '<time>')).to eq(<<~EOS)
+          {"message":"nil","severity":"DEBUG",<time>}
+          {"message":"nil","severity":"INFO",<time>}
+          {"message":"nil","severity":"WARN",<time>}
+          {"message":"nil","severity":"ERROR",<time>}
+          {"message":"nil","severity":"FATAL",<time>}
+          {"message":"nil","severity":"ANY",<time>}
+        EOS
+      end
+    end
+
+    describe 'with false message' do
+      it "logs false" do
+        logger.level = Logger::Severity::DEBUG
+        log_message_at_every_level(logger, false)
+
+        expect(log_stream.string.gsub(/"timestamp":"[^"]+"/, '"timestamp":"<time>"')).to eq(<<~EOS)
+          {"message":"false","severity":"DEBUG","timestamp":"<time>"}
+          {"message":"false","severity":"INFO","timestamp":"<time>"}
+          {"message":"false","severity":"WARN","timestamp":"<time>"}
+          {"message":"false","severity":"ERROR","timestamp":"<time>"}
+          {"message":"false","severity":"FATAL","timestamp":"<time>"}
+          {"message":"false","severity":"ANY","timestamp":"<time>"}
+        EOS
       end
     end
   end
@@ -375,6 +408,44 @@ describe ContextualLogger do
         LOG_LEVEL_STRINGS_TO_CONSTANTS.each do |uppercase_string_level, constant_level|
           lowercase_symbol_level = uppercase_string_level.downcase.to_sym
           expect(ContextualLogger.normalize_log_level(lowercase_symbol_level)).to eq(constant_level)
+        end
+      end
+    end
+
+    describe "normalize_message" do
+      class CustomInspect
+        def inspect
+          "<custom>"
+        end
+      end
+
+      describe 'with nil' do
+        it "returns 'nil'" do
+          expect(ContextualLogger.normalize_message(nil)).to eq("nil")
+        end
+      end
+
+      describe 'with false' do
+        it "returns 'false'" do
+          expect(ContextualLogger.normalize_message(false)).to eq("false")
+        end
+      end
+
+      describe 'with a symbol' do
+        it "returns :symbol" do
+          expect(ContextualLogger.normalize_message(:symbol)).to eq(":symbol")
+        end
+      end
+
+      describe 'with a custom #inspect' do
+        it "returns .inspect" do
+          expect(ContextualLogger.normalize_message(CustomInspect.new)).to eq("<custom>")
+        end
+      end
+
+      describe 'with an Exception' do
+        it "returns .inspect (skipping the backtrace)" do
+          expect(ContextualLogger.normalize_message(ArgumentError.new("err"))).to eq("#<ArgumentError: err>")
         end
       end
     end
