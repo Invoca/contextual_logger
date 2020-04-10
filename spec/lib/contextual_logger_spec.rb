@@ -379,4 +379,45 @@ describe ContextualLogger do
       end
     end
   end
+
+  describe 'with redaction' do
+    let(:sensitive_data) { 'sensitive_string_123' }
+
+    before(:each) do
+      logger.register_secret(sensitive_data)
+    end
+
+    describe 'with sensitive data in the message' do
+      let(:expected_log_hash) do
+        {
+          severity: 'DEBUG',
+          service: 'test_service',
+          message: 'this is a test with <redacted>',
+          timestamp: Time.now
+        }
+      end
+
+      it 'replaces sensitive data with <redacted>' do
+        expect_log_line_to_be_written(expected_log_hash.to_json)
+        expect(logger.debug("this is a test with #{sensitive_data}", service: 'test_service')).to eq(true)
+      end
+    end
+
+    describe 'with sensitive data in the context' do
+      let(:expected_log_hash) do
+        {
+          severity: 'DEBUG',
+          service: 'test_service',
+          message: 'this is a test',
+          password: '<redacted>',
+          timestamp: Time.now
+        }
+      end
+
+      it 'replaces sensitive data with <redacted>' do
+        expect_log_line_to_be_written(expected_log_hash.to_json)
+        expect(logger.debug("this is a test", service: 'test_service', password: sensitive_data)).to eq(true)
+      end
+    end
+  end
 end

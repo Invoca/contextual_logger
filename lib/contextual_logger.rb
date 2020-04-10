@@ -2,6 +2,7 @@
 
 require 'active_support'
 require 'json'
+require_relative './contextual_logger/redactor'
 require_relative './contextual_logger/context/handler'
 
 module ContextualLogger
@@ -35,6 +36,8 @@ module ContextualLogger
   end
 
   module LoggerMixin
+    delegate :register_secret, to: :redactor
+
     def global_context=(context)
       Context::Handler.new(context).set!
     end
@@ -105,10 +108,18 @@ module ContextualLogger
     end
 
     def write_entry_to_log(severity, timestamp, progname, message, context:)
-      @logdev&.write(format_message(format_severity(severity), timestamp, progname, message, context: context))
+      @logdev&.write(
+        redactor.redact(
+          format_message(format_severity(severity), timestamp, progname, message, context: context)
+        )
+      )
     end
 
     private
+
+    def redactor
+      @redactor ||= Redactor.new
+    end
 
     def format_message(severity, timestamp, progname, message, context: {})
       message_hash = message_hash_with_context(severity, timestamp, progname, message, context: context)
