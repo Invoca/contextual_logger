@@ -15,7 +15,7 @@ Gem::Specification.new do |spec|
   spec.files       = Dir['lib/**/*']
   spec.homepage    = 'https://rubygems.org/gems/contextual_logger'
   spec.metadata    = {
-    "source_code_uri"   => "https://github.com/Invoca/process_settings",
+    "source_code_uri"   => "https://github.com/Invoca/contextual_logger",
     "allowed_push_host" => "https://rubygems.org"
   }
 
