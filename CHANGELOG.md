@@ -3,7 +3,7 @@
 Inspired by [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 Note: this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.6.0] - Unreleased
+## [0.6.0] - 2020-04-13
 ### Added
 - The ability to redact sensitive data from log entries by registering the sensitive strings ahead of time with the logger
 - `ContextualLogger#normalize_message` as a general logging helper method to normalize any message to string format.
