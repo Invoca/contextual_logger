@@ -6,6 +6,7 @@ Note: this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0
 ## [0.6.2] - Unreleased
 ### Fixed
 - Fixes bug where redaction was improperly redacting jsonified strings (#17)
+- Fixes bug where `ActiveSupport#delegate` is not loaded before used
 
 ## [0.6.1] - 2020-04-03
 ### Fixed
