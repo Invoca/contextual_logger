@@ -118,9 +118,7 @@ module ContextualLogger
 
     def write_entry_to_log(severity, timestamp, progname, message, context:)
       @logdev&.write(
-        redactor.redact(
-          format_message(format_severity(severity), timestamp, progname, message, context: context)
-        )
+        format_message(format_severity(severity), timestamp, progname, redactor.redact(message), context: redactor.redact(context))
       )
     end
 

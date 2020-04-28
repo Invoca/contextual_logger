@@ -463,12 +463,12 @@ describe ContextualLogger do
         {
           severity: 'DEBUG',
           service: 'test_service',
-          message: 'this is a test with <redacted>',
+          message: 'this is a test with ******',
           timestamp: Time.now
         }
       end
 
-      it 'replaces sensitive data with <redacted>' do
+      it 'replaces sensitive data with ******' do
         expect_log_line_to_be_written(expected_log_hash.to_json)
         expect(logger.debug("this is a test with #{sensitive_data}", service: 'test_service')).to eq(true)
       end
@@ -480,12 +480,31 @@ describe ContextualLogger do
           severity: 'DEBUG',
           service: 'test_service',
           message: 'this is a test',
-          password: '<redacted>',
+          password: '******',
           timestamp: Time.now
         }
       end
 
-      it 'replaces sensitive data with <redacted>' do
+      it 'replaces sensitive data with ******' do
+        expect_log_line_to_be_written(expected_log_hash.to_json)
+        expect(logger.debug("this is a test", service: 'test_service', password: sensitive_data)).to eq(true)
+      end
+    end
+
+    describe 'with sensitive data that includes special escaped characters' do
+      let(:expected_log_hash) do
+        {
+          severity: 'DEBUG',
+          service: 'test_service',
+          message: 'this is a test',
+          password: '******',
+          timestamp: Time.now
+        }
+      end
+
+      let(:sensitive_data) { '"' }
+
+      it 'replaces sensitive data with ******' do
         expect_log_line_to_be_written(expected_log_hash.to_json)
         expect(logger.debug("this is a test", service: 'test_service', password: sensitive_data)).to eq(true)
       end
