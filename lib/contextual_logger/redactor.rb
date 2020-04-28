@@ -17,11 +17,18 @@ module ContextualLogger
       end
     end
 
-    def redact(log_line)
+    def redact(log_entry)
       if redaction_regex
-        log_line.gsub(redaction_regex, '<redacted>')
+        case log_entry
+        when Hash
+          log_entry.reduce({}) { |redacted_log_entry, (key, value)| redacted_log_entry.merge(key => redact(value)) }
+        when Array
+          log_entry.map { |value| redact(value) }
+        else
+          log_entry.to_s.gsub(redaction_regex, '******')
+        end
       else
-        log_line
+        log_entry
       end
     end
   end
