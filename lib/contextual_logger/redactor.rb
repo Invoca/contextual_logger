@@ -4,6 +4,8 @@ module ContextualLogger
   class Redactor
     attr_reader :redaction_set, :redaction_regex
 
+    REDACTED_STRING = '******'
+
     def initialize
       @redaction_set   = Set.new
       @redaction_regex = nil
@@ -30,7 +32,12 @@ module ContextualLogger
         when true, false
           log_entry
         else
-          log_entry.to_s.gsub(redaction_regex, '******')
+          log_entry_string = log_entry.to_s
+          if log_entry_string.match?(redaction_regex)
+            log_entry_string.to_s.gsub(redaction_regex, REDACTED_STRING)
+          else
+            log_entry_string
+          end
         end
       else
         log_entry

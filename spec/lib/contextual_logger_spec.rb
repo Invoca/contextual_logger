@@ -485,28 +485,39 @@ describe ContextualLogger do
         }
       end
 
-      it 'replaces sensitive data with ******' do
-        expect_log_line_to_be_written(expected_log_hash.to_json)
-        expect(logger.debug("this is a test", service: 'test_service', password: sensitive_data)).to eq(true)
-      end
-    end
-
-    describe 'with sensitive data that includes special escaped characters' do
-      let(:expected_log_hash) do
-        {
-          severity: 'DEBUG',
-          service: 'test_service',
-          message: 'this is a test',
-          password: '******',
-          timestamp: Time.now
-        }
+      describe 'when added using the inline method' do
+        it 'replaces sensitive data with ******' do
+          expect_log_line_to_be_written(expected_log_hash.to_json)
+          expect(logger.debug("this is a test", service: 'test_service', password: sensitive_data)).to eq(true)
+        end
       end
 
-      let(:sensitive_data) { '"' }
+      describe 'when added using the with_context method' do
+        it 'replaces sensitive data with ******' do
+          expect_log_line_to_be_written(expected_log_hash.to_json)
+          logger.with_context(password: sensitive_data) do
+            expect(logger.debug("this is a test", service: 'test_service')).to eq(true)
+          end
+        end
+      end
 
-      it 'replaces sensitive data with ******' do
-        expect_log_line_to_be_written(expected_log_hash.to_json)
-        expect(logger.debug("this is a test", service: 'test_service', password: sensitive_data)).to eq(true)
+      describe 'when added through the global context' do
+        before { logger.global_context = { password: sensitive_data } }
+        after  { logger.global_context = {} }
+
+        it 'replaces sensitive data with ******' do
+          expect_log_line_to_be_written(expected_log_hash.to_json)
+          expect(logger.debug("this is a test", service: 'test_service')).to eq(true)
+        end
+      end
+
+      describe 'when the sensitive data includes special characters' do
+        let(:sensitive_data) { '"' }
+
+        it 'replaces sensitive data with ******' do
+          expect_log_line_to_be_written(expected_log_hash.to_json)
+          expect(logger.debug("this is a test", service: 'test_service', password: sensitive_data)).to eq(true)
+        end
       end
     end
   end
