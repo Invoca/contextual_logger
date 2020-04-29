@@ -32,16 +32,17 @@ module ContextualLogger
         when true, false
           log_entry
         else
-          log_entry_string = log_entry.to_s
-          if log_entry_string.match?(redaction_regex)
-            log_entry_string.to_s.gsub(redaction_regex, REDACTED_STRING)
-          else
-            log_entry_string
-          end
+          redact_string_if_needed(log_entry.to_s)
         end
       else
         log_entry
       end
+    end
+
+    private
+
+    def redact_string_if_needed(log_entry)
+      log_entry.match?(redaction_regex) ? log_entry.gsub(redaction_regex, REDACTED_STRING) : log_entry
     end
   end
 end
