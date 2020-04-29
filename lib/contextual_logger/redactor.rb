@@ -4,6 +4,8 @@ module ContextualLogger
   class Redactor
     attr_reader :redaction_set, :redaction_regex
 
+    REDACTED_STRING = '******'
+
     def initialize
       @redaction_set   = Set.new
       @redaction_regex = nil
@@ -17,12 +19,30 @@ module ContextualLogger
       end
     end
 
-    def redact(log_line)
+    def redact(log_entry)
       if redaction_regex
-        log_line.gsub(redaction_regex, '<redacted>')
+        case log_entry
+        when Hash
+          log_entry.reduce({}) do |redacted_log_entry, (key, value)|
+            redacted_log_entry[key] = redact(value)
+            redacted_log_entry
+          end
+        when Array
+          log_entry.map { |value| redact(value) }
+        when true, false
+          log_entry
+        else
+          redact_string_if_needed(log_entry.to_s)
+        end
       else
-        log_line
+        log_entry
       end
+    end
+
+    private
+
+    def redact_string_if_needed(log_entry)
+      log_entry.match?(redaction_regex) ? log_entry.gsub(redaction_regex, REDACTED_STRING) : log_entry
     end
   end
 end

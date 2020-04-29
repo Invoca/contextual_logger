@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'active_support'
+require 'active_support/core_ext/module/delegation'
 require 'json'
 require_relative './contextual_logger/redactor'
 require_relative './contextual_logger/context/handler'
@@ -48,11 +49,12 @@ module ContextualLogger
     delegate :register_secret, to: :redactor
 
     def global_context=(context)
-      Context::Handler.new(context).set!
+      Context::Handler.new(redactor.redact(context)).set!
     end
 
     def with_context(context)
-      context_handler = Context::Handler.new(current_context_for_thread.deep_merge(context))
+      redacted_context = current_context_for_thread.deep_merge(redactor.redact(context))
+      context_handler = Context::Handler.new(redacted_context)
       context_handler.set!
       if block_given?
         begin
@@ -110,7 +112,11 @@ module ContextualLogger
             progname = @progname
           end
         end
-        write_entry_to_log(severity, Time.now, progname, message, context: current_context_for_thread.deep_merge(context))
+
+        redacted_context = redactor.redact(context)
+        redacted_message = redactor.redact(message)
+
+        write_entry_to_log(severity, Time.now, progname, redacted_message, context: current_context_for_thread.deep_merge(redacted_context))
       end
 
       true
@@ -118,9 +124,7 @@ module ContextualLogger
 
     def write_entry_to_log(severity, timestamp, progname, message, context:)
       @logdev&.write(
-        redactor.redact(
-          format_message(format_severity(severity), timestamp, progname, message, context: context)
-        )
+        format_message(format_severity(severity), timestamp, progname, message, context: context)
       )
     end
 
