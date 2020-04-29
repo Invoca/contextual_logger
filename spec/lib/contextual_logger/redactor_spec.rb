@@ -25,14 +25,14 @@ RSpec.describe ContextualLogger::Redactor do
   end
 
   describe '#redact' do
-    before(:each) { subject.register_secret('hello') }
+    before { subject.register_secret('hello') }
 
     it 'redacts the sensitive data from the message' do
       expect(subject.redact('hello world')).to eq('****** world')
     end
 
     describe 'with multiple strings' do
-      before(:each) { subject.register_secret('world') }
+      before { subject.register_secret('world') }
 
       it 'redacts all sensitive data from the message' do
         expect(subject.redact('hello world')).to eq('****** ******')

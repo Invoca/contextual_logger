@@ -14,7 +14,7 @@ RSpec::Matchers.define :a_json_log_line_like do |expected|
 end
 
 describe ContextualLogger do
-  before(:each) { Time.now_override = Time.now }
+  before { Time.now_override = Time.now }
   after(:each)  { logger.global_context = {} }
 
   subject(:logger) { ContextualLogger.new(Logger.new('/dev/null')) }
@@ -454,7 +454,7 @@ describe ContextualLogger do
   describe 'with redaction' do
     let(:sensitive_data) { 'sensitive_string_123' }
 
-    before(:each) do
+    before do
       logger.register_secret(sensitive_data)
     end
 
