@@ -21,9 +21,14 @@ module ContextualLogger
       if redaction_regex
         case log_entry
         when Hash
-          log_entry.reduce({}) { |redacted_log_entry, (key, value)| redacted_log_entry.merge(key => redact(value)) }
+          log_entry.reduce({}) do |redacted_log_entry, (key, value)|
+            redacted_log_entry[key] = redact(value)
+            redacted_log_entry
+          end
         when Array
           log_entry.map { |value| redact(value) }
+        when true, false
+          log_entry
         else
           log_entry.to_s.gsub(redaction_regex, '******')
         end
