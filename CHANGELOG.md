@@ -3,14 +3,19 @@
 Inspired by [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 Note: this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] - Unreleased
+### Deprecated
+- Deprecated ContextualLogger.new. It will be removed in version 1.0.
+  Instead, use `expect ContextualLogger::LoggerMixin` on a logger instance or `include ContextualLogger::LoggerMixin` in a Logger class.
+
 ## [0.6.1] - 2020-04-03
 ### Fixed
-- Gemspec to point to correct source code uri
+- Fixed gemspec to point to correct source code uri
 
 ## [0.6.0] - 2020-04-13
 ### Added
-- The ability to redact sensitive data from log entries by registering the sensitive strings ahead of time with the logger
-- `ContextualLogger#normalize_message` as a general logging helper method to normalize any message to string format.
+- Added the ability to redact sensitive data from log entries by registering the sensitive strings ahead of time with the logger
+- Added `ContextualLogger#normalize_message` as a general logging helper method to normalize any message to string format.
 
 ### Changed
 - Restored ::Logger's ability to log non-string messages like `nil` or `false`, in case there's a gem
@@ -35,6 +40,7 @@ Note: this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0
  - Extracted `ContextualLogger.normalize_log_level` into a public class method so we can call it elsewhere where we allow log_level to be
    configured to text values like 'debug'.
 
+[0.7.0]: https://github.com/Invoca/contextual_logger/compare/v0.6.1...v0.7.0
 [0.6.1]: https://github.com/Invoca/contextual_logger/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/Invoca/contextual_logger/compare/v0.5.1...v0.6.0
 [0.5.1]: https://github.com/Invoca/contextual_logger/compare/v0.5.0...v0.5.1

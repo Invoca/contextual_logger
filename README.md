@@ -19,15 +19,26 @@ gem 'contextual_logger', git: 'git://github.com/Invoca/contextual_logger.git'
 
 ## Usage
 ### Initialization
-To use the contextual logger, all you need to do is initailize the object with your existing logger
+To use the contextual logger, all you need to do is `extend` your existing logger instance:
 ```ruby
 require 'logger'
 require 'contextual_logger'
 
-logger = Logger.new(STDOUT)
-contextual_logger = ContextualLogger.new(logger)
+contextual_logger = Logger.new(STDOUT)
+contextual_logger.extend(ContextualLogger::LoggerMixin)
 ```
-**Note: This returns the original logger, mutated with the ContextualLogger mixin**
+Or, `include` it into your own Logger class:
+```ruby
+require 'logger'
+require 'contextual_logger'
+
+class ApplicationLogger < Logger
+  include ContextualLogger::LoggerMixin
+  ...
+end
+
+contextual_logger = ApplicationLogger.new(STDOUT)
+```
 
 ### Logging
 All base logging methods are available for use with _or_ without added context
