@@ -51,3 +51,6 @@ build-iPhoneSimulator/
 
 # rubocop
 .rubocop-https---raw-githubusercontent-com-Invoca-style-guide-master-ruby--rubocop-yml
+
+# appraisal
+gemfiles/*.lock
