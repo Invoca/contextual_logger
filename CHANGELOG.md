@@ -12,6 +12,9 @@ Note: this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0
 - Updated various test to be compatible with rails version 4/5/6
 - Updated the CI pipeline to test against all three supported versions of rails
 
+### Fixed
+- Fixed undefined method `delegate` bug in ActiveSupport version 4
+
 ## [0.6.1] - 2020-04-03
 ### Fixed
 - Gemspec to point to correct source code uri
