@@ -3,6 +3,15 @@
 Inspired by [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 Note: this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] - Unreleased
+### Added
+- Added support for rails 5 and 6.
+- Added appraisal tests for all supported rails version: 4/5/6
+
+### Changed
+- Updated various test to be compatible with rails version 4/5/6
+- Updated the CI pipeline to test against all three supported versions of rails
+
 ## [0.6.1] - 2020-04-03
 ### Fixed
 - Gemspec to point to correct source code uri
@@ -35,6 +44,7 @@ Note: this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0
  - Extracted `ContextualLogger.normalize_log_level` into a public class method so we can call it elsewhere where we allow log_level to be
    configured to text values like 'debug'.
 
+[0.7.0]: https://github.com/Invoca/contextual_logger/compare/v0.6.1...v0.7.0
 [0.6.1]: https://github.com/Invoca/contextual_logger/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/Invoca/contextual_logger/compare/v0.5.1...v0.6.0
 [0.5.1]: https://github.com/Invoca/contextual_logger/compare/v0.5.0...v0.5.1
