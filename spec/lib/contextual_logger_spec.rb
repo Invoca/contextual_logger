@@ -29,7 +29,7 @@ describe ContextualLogger do
   context 'with logger writing to log_stream' do
     let(:log_stream) { StringIO.new }
     let(:log_level) { Logger::Severity::DEBUG }
-    let(:logger) { ContextualLogger.new(Logger.new(log_stream, level: log_level)) }
+    let(:logger) { Logger.new(log_stream, level: log_level).extend(ContextualLogger::LoggerMixin) }
 
     describe 'log level' do
       context 'at default level' do
@@ -104,7 +104,7 @@ describe ContextualLogger do
         log_at_every_level(broadcast_logger, service: 'test_service')
         expect(log_message_levels).to eq(["error", "fatal", "unknown"])
         # note: context lands in `progname` arg
-        expect(console_log_stream.string.gsub(/\[[^]]+\]/, '[]')).to eq(<<~EOS)
+        expect(console_log_stream.string.gsub(/\[[^\]]+\]/, '[]')).to eq(<<~EOS)
           D, [] DEBUG -- {:service=>\"test_service\"}: debug message
           I, []  INFO -- {:service=>\"test_service\"}: info message
           W, []  WARN -- {:service=>\"test_service\"}: warn message
@@ -118,7 +118,7 @@ describe ContextualLogger do
         broadcast_logger.add(Logger::Severity::ERROR, "error message", service: 'test_service')
         expect(log_message_levels).to eq(["error"])
         # note: context lands in `progname` arg
-        expect(console_log_stream.string.gsub(/\[[^]]+\]/, '[]')).to eq("E, [] ERROR -- {:service=>\"test_service\"}: error message\n")
+        expect(console_log_stream.string.gsub(/\[[^\]]+\]/, '[]')).to eq("E, [] ERROR -- {:service=>\"test_service\"}: error message\n")
       end
     end
 
@@ -347,7 +347,7 @@ describe ContextualLogger do
 
   describe 'add' do
     let(:log_stream) { StringIO.new }
-    let(:logger) { ContextualLogger.new(Logger.new(log_stream, level: Logger::Severity::DEBUG)) }
+    let(:logger) { Logger.new(log_stream, level: Logger::Severity::DEBUG).extend(ContextualLogger::LoggerMixin) }
 
     it "preserves the Logger interface with message only" do
       expect(logger.add(Logger::Severity::INFO, "info message")).to eq(true)
@@ -379,7 +379,7 @@ describe ContextualLogger do
     describe "normalize_log_level" do
       it "raises an exception on invalid values" do
         [nil, "", "ABC", 3.5].each do |invalid_value|
-          expect { ContextualLogger.normalize_log_level(invalid_value) }.to raise_exception(ArgumentError, /invalid log level:/), invalid_value
+          expect { ContextualLogger.normalize_log_level(invalid_value) }.to raise_exception(ArgumentError, /invalid log level:/), invalid_value.inspect
         end
       end
 
@@ -501,12 +501,13 @@ describe ContextualLogger do
     subject { ContextualLogger.new(raw_logger) }
 
     it 'is redacted' do
-      expect_any_instance_of(ActiveSupport::Deprecation).to receive(:deprecation_warning).with(:new, nil)
+      expect(STDERR).to receive(:puts).with(/DEPRECATION WARNING: new is deprecated and will be removed from contextual_logger 1\.0/)
 
       subject
     end
 
     it 'returns the logger with a mixin prepended' do
+      expect(STDERR).to receive(:puts).with(anything)
       result = subject
 
       expect(result).to be(subject)
