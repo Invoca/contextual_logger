@@ -17,7 +17,12 @@ describe ContextualLogger do
   before(:each) { Time.now_override = Time.now }
   after(:each)  { logger.global_context = {} }
 
-  subject(:logger) { ContextualLogger.new(Logger.new('/dev/null')) }
+  let(:raw_logger) { Logger.new('/dev/null') }
+  subject(:logger) do
+    raw_logger.tap do |logger|
+      logger.extend(ContextualLogger::LoggerMixin)
+    end
+  end
 
   it { is_expected.to respond_to(:with_context) }
 
@@ -489,6 +494,23 @@ describe ContextualLogger do
         expect_log_line_to_be_written(expected_log_hash.to_json)
         expect(logger.debug("this is a test", service: 'test_service', password: sensitive_data)).to eq(true)
       end
+    end
+  end
+
+  describe 'new' do
+    subject { ContextualLogger.new(raw_logger) }
+
+    it 'is redacted' do
+      expect_any_instance_of(ActiveSupport::Deprecation).to receive(:deprecation_warning).with(:new, nil)
+
+      subject
+    end
+
+    it 'returns the logger with a mixin prepended' do
+      result = subject
+
+      expect(result).to be(subject)
+      expect(result).to be_kind_of(ContextualLogger::LoggerMixin)
     end
   end
 end
