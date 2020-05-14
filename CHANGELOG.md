@@ -3,7 +3,7 @@
 Inspired by [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 Note: this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.7.0] - Unreleased
+## [0.7.0] - 2020-07-14
 ### Deprecated
 - Deprecated ContextualLogger.new. It will be removed in version 1.0.
   Instead, use `expect ContextualLogger::LoggerMixin` on a logger instance or `include ContextualLogger::LoggerMixin` in a Logger class.
