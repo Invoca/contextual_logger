@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'active_support'
+require 'active_support/core_ext/module/delegation'
 require 'json'
 require_relative './contextual_logger/redactor'
 require_relative './contextual_logger/context/handler'

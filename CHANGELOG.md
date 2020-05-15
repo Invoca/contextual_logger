@@ -3,7 +3,19 @@
 Inspired by [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 Note: this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.7.0] - 2020-07-14
+## [0.8.0] - Unreleased
+### Added
+- Added support for rails 5 and 6.
+- Added appraisal tests for all supported rails version: 4/5/6
+
+### Changed
+- Updated various test to be compatible with rails version 4/5/6
+- Updated the CI pipeline to test against all three supported versions of rails
+
+### Fixed
+- Fixed undefined method `delegate` bug in ActiveSupport version 4
+
+## [0.7.0] - 2020-05-14
 ### Deprecated
 - Deprecated ContextualLogger.new. It will be removed in version 1.0.
   Instead, use `expect ContextualLogger::LoggerMixin` on a logger instance or `include ContextualLogger::LoggerMixin` in a Logger class.

@@ -9,9 +9,10 @@ require 'contextual_logger/overrides/active_support/tagged_logging/formatter'
 describe 'ContextualLogger::Overrides::ActiveSupport::TaggedLogging::Formatter' do
   subject do
     logger = Logger.new('/dev/null')
-    logger.extend(ContextualLogger::LoggerMixin)
     logger.formatter = ->(_, _, _, msg_with_context) { "#{msg_with_context.to_json}\n" }
-    ActiveSupport::TaggedLogging.new(logger)
+    logger = ActiveSupport::TaggedLogging.new(logger)
+    logger.extend(ContextualLogger::LoggerMixin)
+    logger
   end
 
   before do
