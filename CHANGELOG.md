@@ -52,6 +52,7 @@ Note: this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0
  - Extracted `ContextualLogger.normalize_log_level` into a public class method so we can call it elsewhere where we allow log_level to be
    configured to text values like 'debug'.
 
+[0.8.0]: https://github.com/Invoca/contextual_logger/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/Invoca/contextual_logger/compare/v0.6.1...v0.7.0
 [0.6.1]: https://github.com/Invoca/contextual_logger/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/Invoca/contextual_logger/compare/v0.5.1...v0.6.0
