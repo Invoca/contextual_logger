@@ -9,7 +9,7 @@ require 'json'
 describe ContextualLogger::LoggerWithContext do
   context "when created with a base logger" do
     let(:log_stream) { StringIO.new }
-    let(:base_logger) { ContextualLogger.new(Logger.new(log_stream, level: Logger::Severity::FATAL)) }
+    let(:base_logger) { Logger.new(log_stream, level: Logger::Severity::FATAL).extend(ContextualLogger::LoggerMixin) }
     let(:context) { { log_source: "redis_client" } }
 
     subject(:logger_with_context) { ContextualLogger::LoggerWithContext.new(base_logger, context) }

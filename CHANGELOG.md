@@ -3,7 +3,7 @@
 Inspired by [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 Note: this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.7.0] - Unreleased
+## [0.8.0] - Unreleased
 ### Added
 - Added support for rails 5 and 6.
 - Added appraisal tests for all supported rails version: 4/5/6
@@ -15,14 +15,19 @@ Note: this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0
 ### Fixed
 - Fixed undefined method `delegate` bug in ActiveSupport version 4
 
+## [0.7.0] - 2020-05-14
+### Deprecated
+- Deprecated ContextualLogger.new. It will be removed in version 1.0.
+  Instead, use `expect ContextualLogger::LoggerMixin` on a logger instance or `include ContextualLogger::LoggerMixin` in a Logger class.
+
 ## [0.6.1] - 2020-04-03
 ### Fixed
-- Gemspec to point to correct source code uri
+- Fixed gemspec to point to correct source code uri
 
 ## [0.6.0] - 2020-04-13
 ### Added
-- The ability to redact sensitive data from log entries by registering the sensitive strings ahead of time with the logger
-- `ContextualLogger#normalize_message` as a general logging helper method to normalize any message to string format.
+- Added the ability to redact sensitive data from log entries by registering the sensitive strings ahead of time with the logger
+- Added `ContextualLogger#normalize_message` as a general logging helper method to normalize any message to string format.
 
 ### Changed
 - Restored ::Logger's ability to log non-string messages like `nil` or `false`, in case there's a gem

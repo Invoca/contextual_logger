@@ -11,6 +11,7 @@ module ContextualLogger
     def new(logger)
       logger.extend(LoggerMixin)
     end
+    deprecate :new, deprecator: ActiveSupport::Deprecation.new('1.0', 'contextual_logger')
 
     def normalize_log_level(log_level)
       if log_level.is_a?(Integer) && (Logger::Severity::DEBUG..Logger::Severity::UNKNOWN).include?(log_level)
