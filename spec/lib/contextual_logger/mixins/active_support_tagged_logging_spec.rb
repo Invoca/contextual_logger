@@ -23,8 +23,6 @@ describe 'ContextualLogger::Overrides::ActiveSupport::TaggedLogging::Formatter' 
     subject.push_tags('test')
     expected_log_line = {
       message: 'this is a test',
-      severity: 'DEBUG',
-      timestamp: Time.now,
       service: 'test_service',
       log_tags: 'test'
     }.to_json
