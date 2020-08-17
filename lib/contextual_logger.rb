@@ -136,11 +136,11 @@ module ContextualLogger
       if @formatter
         @formatter.call(severity, timestamp, progname, { message: ContextualLogger.normalize_message(message), **context })
       else
-        "#{basic_message_formatting(severity, timestamp, progname, message, context: context)}\n"
+        "#{basic_json_log_entry(severity, timestamp, progname, message, context: context)}\n"
       end
     end
 
-    def basic_message_formatting(severity, timestamp, progname, message, context:)
+    def basic_json_log_entry(severity, timestamp, progname, message, context:)
       message_hash = {
         message:   ContextualLogger.normalize_message(message),
         severity:  severity,
