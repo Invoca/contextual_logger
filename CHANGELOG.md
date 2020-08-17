@@ -3,7 +3,7 @@
 Inspired by [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 Note: this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.9.0] - Unreleased
+## [0.9.0] - 2020-08-17
 ### Removed
 - Removed unnecessary duplicate context (`severity`, `timestamp`, and `progname`) in message hash passed to formatter. These
 are already passed to the formatter as arguments so that the formatter and decided how to add them to the log line.
