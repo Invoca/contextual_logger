@@ -3,6 +3,10 @@
 Inspired by [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 Note: this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.1] - 2020-08-18
+### Fixed
+- Fixed bug where merging context with string keys was causing a "key" is not a Symbol error
+
 ## [0.9.0] - 2020-08-17
 ### Removed
 - Removed unnecessary duplicate context (`severity`, `timestamp`, and `progname`) in message hash passed to formatter. These
@@ -57,6 +61,7 @@ are already passed to the formatter as arguments so that the formatter and decid
  - Extracted `ContextualLogger.normalize_log_level` into a public class method so we can call it elsewhere where we allow log_level to be
    configured to text values like 'debug'.
 
+[0.9.1]: https://github.com/Invoca/contextual_logger/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/Invoca/contextual_logger/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/Invoca/contextual_logger/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/Invoca/contextual_logger/compare/v0.6.1...v0.7.0
