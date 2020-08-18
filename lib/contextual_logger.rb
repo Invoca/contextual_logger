@@ -134,7 +134,7 @@ module ContextualLogger
 
     def format_message(severity, timestamp, progname, message, context: {})
       if @formatter
-        @formatter.call(severity, timestamp, progname, { message: ContextualLogger.normalize_message(message), **context })
+        @formatter.call(severity, timestamp, progname, { message: ContextualLogger.normalize_message(message) }.merge!(context))
       else
         "#{basic_json_log_entry(severity, timestamp, progname, message, context: context)}\n"
       end
