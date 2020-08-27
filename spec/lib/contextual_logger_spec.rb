@@ -359,6 +359,11 @@ describe ContextualLogger do
       expect(log_stream.string).to match(/\{"message":"info message","severity":"INFO","timestamp":".*"\}/)
     end
 
+    it "preserves the Logger interface with non-nil progname & block" do
+      expect(logger.add(Logger::Severity::INFO, nil, 'request') { "info message" }).to eq(true)
+      expect(log_stream.string).to match(/\{"message":"info message","severity":"INFO","timestamp":".*","progname":"request"\}/)
+    end
+
     it "preserves the Logger interface with nil message & message in progname spot" do
       expect(logger.add(Logger::Severity::INFO, nil, "info message")).to eq(true)
       expect(log_stream.string).to match(/\{"message":"info message","severity":"INFO","timestamp":".*"\}/)
