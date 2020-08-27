@@ -76,8 +76,15 @@ module ContextualLogger
       add(Logger::Severity::DEBUG, message.nil? && block_given? ? yield : message, **context)
     end
 
-    def info(message = nil, context = {})
-      add(Logger::Severity::INFO, message.nil? && block_given? ? yield : message, **context)
+    def info(arg = nil, **context, &block)
+      if context.empty?
+        # classic pattern that is not aware of ContextualLogger
+        add(Logger::Severity::INFO, nil, arg, &block)
+      else
+        # this code is aware of ContextualLogger since it passed a context
+        # assume it won't use progname in arg
+        add(Logger::Severity::INFO, arg, context, &block)
+      end
     end
 
     def warn(message = nil, context = {})
@@ -100,17 +107,20 @@ module ContextualLogger
       severity >= level
     end
 
-    def add(init_severity, message = nil, init_progname = nil, **context)   # Ruby will prefer to match hashes up to last ** argument
+    def add(init_severity, arg1 = nil, arg2 = nil, **context)   # Ruby will prefer to match hashes up to last ** argument
       severity = init_severity || UNKNOWN
       if log_level_enabled?(severity)
-        progname = init_progname || @progname
-        if message.nil?
+        if arg1.nil?
           if block_given?
             message = yield
+            progname = arg2 || @progname
           else
-            message = init_progname
+            message = arg2
             progname = @progname
           end
+        else
+          message = arg1
+          progname = arg2 || @progname
         end
         write_entry_to_log(severity, Time.now, progname, message, context: current_context_for_thread.deep_merge(context))
       end
