@@ -210,6 +210,15 @@ describe ContextualLogger do
       end
     end
 
+    context 'with non-String progname and message' do
+      let(:message) { ':progname: :test' }
+
+      it 'handles message block (inline context) with progname' do
+        expect_log_line_to_be_written(expected_log_hash.to_json)
+        expect(logger.info(:progname, service: 'test_service') { :test }).to eq(true)
+      end
+    end
+
     context "when log level isn't enabled" do
       before { logger.level = Logger::Severity::UNKNOWN }
 
