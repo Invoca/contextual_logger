@@ -5,13 +5,23 @@ Note: this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0
 
 ## [0.10.0] - Unreleased
 ### Added
-- Added support for all combinations of `logger.info('progname', context_key: value) { 'message' }`.
+- Added support and tests for all combinations of `progname`, `message`, and `context`:
+```
+logger.info(message)
+logger.info(context_key1: value, context_key2: value)
+logger.info(message, context_key1: value, context_key2: value)
+logger.info { message }
+logger.info(progname) { message }
+logger.info(context_key1: value, context_key2: value) { message }
+logger.info(progname, context_key1: value, context_key2: value) { message }
+```
+including where `progname` and `message` are types other than `String`.
 
 ### Fixed
-- Fixed bug where usage like in Faraday: `logger.info('progname') { 'message' }` was dropping the message and only showing
+- Fixed bug where usage like in Faraday: `logger.info(progname) { message }` was dropping the message and only showing
   `progname`.
-- Fixed bug where message block would get called (and could be slow) even if the log_level was not enabled.
-
+- Fixed bug in block form where the message block would be called even if the log_level was not enabled
+  (this could have been slow).
 
 ## [0.9.1] - 2020-08-18
 ### Fixed
@@ -71,6 +81,7 @@ are already passed to the formatter as arguments so that the formatter and decid
  - Extracted `ContextualLogger.normalize_log_level` into a public class method so we can call it elsewhere where we allow log_level to be
    configured to text values like 'debug'.
 
+[0.10.0]: https://github.com/Invoca/contextual_logger/compare/v0.9.1...v0.10.0
 [0.9.1]: https://github.com/Invoca/contextual_logger/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/Invoca/contextual_logger/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/Invoca/contextual_logger/compare/v0.7.0...v0.8.0
