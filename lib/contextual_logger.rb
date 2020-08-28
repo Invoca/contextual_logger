@@ -7,6 +7,16 @@ require_relative './contextual_logger/redactor'
 require_relative './contextual_logger/context/handler'
 
 module ContextualLogger
+  LOG_LEVEL_NAMES_TO_SEVERITY =
+  {
+    debug:  Logger::Severity::DEBUG,
+    info:   Logger::Severity::INFO,
+    warn:   Logger::Severity::WARN,
+    error:  Logger::Severity::ERROR,
+    fatal:  Logger::Severity::FATAL,
+    unknown: Logger::Severity::UNKNOWN
+  }.freeze
+
   class << self
     def new(logger)
       logger.extend(LoggerMixin)
@@ -17,22 +27,8 @@ module ContextualLogger
       if log_level.is_a?(Integer) && (Logger::Severity::DEBUG..Logger::Severity::UNKNOWN).include?(log_level)
         log_level
       else
-        case log_level.to_s.downcase
-        when 'debug'
-          Logger::Severity::DEBUG
-        when 'info'
-          Logger::Severity::INFO
-        when 'warn'
-          Logger::Severity::WARN
-        when 'error'
-          Logger::Severity::ERROR
-        when 'fatal'
-          Logger::Severity::FATAL
-        when 'unknown'
-          Logger::Severity::UNKNOWN
-        else
+        LOG_LEVEL_NAMES_TO_SEVERITY[log_level.to_s.downcase.to_sym] or
           raise ArgumentError, "invalid log level: #{log_level.inspect}"
-        end
       end
     end
 
@@ -78,14 +74,7 @@ module ContextualLogger
     # compatible with classic implementations like in the plain Logger
     # and ActiveSupport::Logger.broadcast.
 
-    {
-      debug:  Logger::Severity::DEBUG,
-      info:   Logger::Severity::INFO,
-      warn:   Logger::Severity::WARN,
-      error:  Logger::Severity::ERROR,
-      fatal:  Logger::Severity::FATAL,
-      unknown: Logger::Severity::UNKNOWN
-    }.each do |method_name, log_level|
+    LOG_LEVEL_NAMES_TO_SEVERITY.each do |method_name, log_level|
       eval <<~EOS
         def #{method_name}(arg = nil, context = nil, &block)
           if context
