@@ -181,16 +181,33 @@ describe ContextualLogger do
   end
 
   context 'inline context' do
+    let(:message) { 'this is a test' }
     let(:expected_log_hash) do
       {
-        message: 'this is a test',
-        timestamp: Time.now
+        severity: 'INFO',
+        message: message,
+        timestamp: Time.now,
+        service: 'test_service'
       }
     end
 
-    it 'handles message block (inline context)' do
-      expect_log_line_to_be_written(expected_log_hash.merge(severity: 'INFO', service: 'test_service').to_json)
+    it 'handles message block (inline context) with nil progname' do
+      expect_log_line_to_be_written(expected_log_hash.to_json)
       expect(logger.info(nil, service: 'test_service') { 'this is a test' }).to eq(true)
+    end
+
+    it 'handles message block (inline context) with no progname' do
+      expect_log_line_to_be_written(expected_log_hash.to_json)
+      expect(logger.info(service: 'test_service') { 'this is a test' }).to eq(true)
+    end
+
+    context 'with progname and message' do
+      let(:message) { 'request: this is a test' }
+
+      it 'handles message block (inline context) with progname' do
+        expect_log_line_to_be_written(expected_log_hash.to_json)
+        expect(logger.info('request', service: 'test_service') { 'this is a test' }).to eq(true)
+      end
     end
 
     context "when log level isn't enabled" do

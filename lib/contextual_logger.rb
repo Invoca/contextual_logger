@@ -68,19 +68,29 @@ module ContextualLogger
       Context::Handler.current_context
     end
 
-    # In methods below, we assume that presence of context means new code that is aware of
-    # ContextualLogger...and that that code never uses progname.
-    # This is important because we only get 2 args total passed to add(), in order to be
-    # compatible with classic implementations like in the plain Logger
-    # and ActiveSupport::Logger.broadcast.
+    # In the methods generated below, we assume that presence of context means new code that is
+    # aware of ContextualLogger...and that that code never uses progname.
+    # This is important because we only get 2 args total (plus &block) passed to add(), in order to be
+    # compatible with classic implementations like in the plain Logger and
+    # ActiveSupport::Logger.broadcast.
+
+    # Note that we can't yield before add because `add` might skip it based on log_level. And we can't check
+    # log_level here because we might be running in ActiveSupport::Logging.broadcast which has multiple
+    # loggers, each with their own log_level.
 
     LOG_LEVEL_NAMES_TO_SEVERITY.each do |method_name, log_level|
       class_eval(<<~EOS, __FILE__, __LINE__ + 1)
-        def #{method_name}(arg = nil, context = nil, &block)
-          if context
-            add(#{log_level}, arg, context, &block)
-          else
+        def #{method_name}(arg = nil, **context, &block)
+          if context.empty?
             add(#{log_level}, nil, arg, &block)
+          else
+            if arg.nil?
+              add(#{log_level}, nil, context, &block)
+            elsif block
+              add(#{log_level}, nil, context) { "\#{arg}: \#{block.call}" }
+            else
+              add(#{log_level}, arg, context)
+            end
           end
         end
       EOS
