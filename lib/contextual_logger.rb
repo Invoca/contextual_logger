@@ -72,43 +72,37 @@ module ContextualLogger
       Context::Handler.current_context
     end
 
-    def debug(message = nil, context = {})
-      add(Logger::Severity::DEBUG, message.nil? && block_given? ? yield : message, **context)
-    end
+    # In methods below, we assume that presence of context means new code that is aware of
+    # ContextualLogger...and that that code never uses progname.
+    # This is important because we only get 2 args total passed to add(), in order to be
+    # compatible with classic implementations like in the plain Logger
+    # and ActiveSupport::Logger.broadcast.
 
-    def info(arg = nil, **context, &block)
-      if context.empty?
-        # classic pattern that is not aware of ContextualLogger
-        add(Logger::Severity::INFO, nil, arg, &block)
-      else
-        # this code is aware of ContextualLogger since it passed a context
-        # assume it won't use progname in arg
-        add(Logger::Severity::INFO, arg, context, &block)
-      end
-    end
-
-    def warn(message = nil, context = {})
-      add(Logger::Severity::WARN, message.nil? && block_given? ? yield : message, **context)
-    end
-
-    def error(message = nil, context = {})
-      add(Logger::Severity::ERROR, message.nil? && block_given? ? yield : message, **context)
-    end
-
-    def fatal(message = nil, context = {})
-      add(Logger::Severity::FATAL, message.nil? && block_given? ? yield : message, **context)
-    end
-
-    def unknown(message = nil, context = {})
-      add(Logger::Severity::UNKNOWN, message.nil? && block_given? ? yield : message, **context)
+    {
+      debug:  Logger::Severity::DEBUG,
+      info:   Logger::Severity::INFO,
+      warn:   Logger::Severity::WARN,
+      error:  Logger::Severity::ERROR,
+      fatal:  Logger::Severity::FATAL,
+      unknown: Logger::Severity::UNKNOWN
+    }.each do |method_name, log_level|
+      eval <<~EOS
+        def #{method_name}(arg = nil, context = nil, &block)
+          if context
+            add(#{log_level}, arg, context, &block)
+          else
+            add(#{log_level}, nil, arg, &block)
+          end
+        end
+      EOS
     end
 
     def log_level_enabled?(severity)
       severity >= level
     end
 
-    def add(init_severity, arg1 = nil, arg2 = nil, **context)   # Ruby will prefer to match hashes up to last ** argument
-      severity = init_severity || UNKNOWN
+    def add(arg_severity, arg1 = nil, arg2 = nil, **context)   # Ruby will prefer to match hashes up to last ** argument
+      severity = arg_severity || UNKNOWN
       if log_level_enabled?(severity)
         if arg1.nil?
           if block_given?

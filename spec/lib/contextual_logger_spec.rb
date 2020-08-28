@@ -194,12 +194,14 @@ describe ContextualLogger do
     end
 
     context "when log level isn't enabled" do
-      before { logger.level = Logger::Severity::ERROR }
+      before { logger.level = Logger::Severity::UNKNOWN }
 
-      it "does not call message block" do
-        block_called = false
-        logger.info(nil, service: 'test_service') { block_called = true }
-        expect(block_called).to be_falsey
+      [:debug, :info, :warn, :error, :fatal].each do |level|
+        it "does not call message block (#{level})" do
+          block_called = false
+          logger.send(level, nil, service: 'test_service') { block_called = true }
+          expect(block_called).to be_falsey
+        end
       end
     end
   end
