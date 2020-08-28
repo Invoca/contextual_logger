@@ -75,7 +75,7 @@ module ContextualLogger
     # and ActiveSupport::Logger.broadcast.
 
     LOG_LEVEL_NAMES_TO_SEVERITY.each do |method_name, log_level|
-      eval <<~EOS
+      class_eval(<<~EOS, __FILE__, __LINE__ + 1)
         def #{method_name}(arg = nil, context = nil, &block)
           if context
             add(#{log_level}, arg, context, &block)
