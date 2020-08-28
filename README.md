@@ -50,6 +50,11 @@ All base logging methods are available for use with _or_ without added context
 contextual_logger.info('Something might have just happened', file: __FILE__, current_object: inspect)
 ```
 
+The block form with optional 'progname' is also supported. As with ::Logger: the block is only called if the log level is enabled.
+```ruby
+contextual_logger.debug('progname', current_id: current_object.id) { "debug info: #{expensive_debug_function}" }
+```
+
 If there is a base set of context you'd like to apply to a block of code, simply wrap it in `#with_context`
 ```ruby
 contextual_logger.with_context(file: __FILE__, current_object: inspect) do

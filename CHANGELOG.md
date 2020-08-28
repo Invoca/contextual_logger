@@ -3,6 +3,16 @@
 Inspired by [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 Note: this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.0] - Unreleased
+### Added
+- Added support for all combinations of `logger.info('progname', context_key: value) { 'message' }`.
+
+### Fixed
+- Fixed bug where usage like in Faraday: `logger.info('progname') { 'message' }` was dropping the message and only showing
+  `progname`.
+- Fixed bug where message block would get called (and could be slow) even if the log_level was not enabled.
+
+
 ## [0.9.1] - 2020-08-18
 ### Fixed
 - Fixed bug where merging context with string keys was causing a "key" is not a Symbol error
