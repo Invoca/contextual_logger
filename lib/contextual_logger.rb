@@ -106,11 +106,7 @@ module ContextualLogger
         if arg1.nil?
           if block_given?
             message = yield
-            if arg2.nil? && context.has_key?(:progname)
-              progname = context[:progname] || @progname
-            else
-              progname = arg2 || @progname
-            end
+            progname = arg2 || context[:progname] || @progname
           else
             message = arg2
             progname = @progname
