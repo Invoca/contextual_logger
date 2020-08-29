@@ -158,7 +158,7 @@ describe ContextualLogger do
   context 'with no context' do
     let(:expected_log_hash) do
       {
-        message: 'this is a test',
+        message: 'request: this is a test',
         timestamp: Time.now,
         progname: 'request'
       }
@@ -205,17 +205,8 @@ describe ContextualLogger do
       let(:message) { 'request: this is a test' }
 
       it 'handles message block (inline context) with progname' do
-        expect_log_line_to_be_written(expected_log_hash.to_json)
+        expect_log_line_to_be_written(expected_log_hash.merge(progname: 'request').to_json)
         expect(logger.info('request', service: 'test_service') { 'this is a test' }).to eq(true)
-      end
-    end
-
-    context 'with non-String progname and message' do
-      let(:message) { ':progname: :test' }
-
-      it 'handles message block (inline context) with progname' do
-        expect_log_line_to_be_written(expected_log_hash.to_json)
-        expect(logger.info(:progname, service: 'test_service') { :test }).to eq(true)
       end
     end
 
@@ -438,7 +429,7 @@ describe ContextualLogger do
 
     it "preserves the Logger interface with non-nil progname & block" do
       expect(logger.add(Logger::Severity::INFO, nil, 'request') { "info message" }).to eq(true)
-      expect(log_stream.string).to match(/\{"message":"info message","severity":"INFO","timestamp":".*","progname":"request"\}/)
+      expect(log_stream.string).to match(/\{"message":"request: info message","severity":"INFO","timestamp":".*","progname":"request"\}/)
     end
 
     it "preserves the Logger interface with nil message & message in progname spot" do

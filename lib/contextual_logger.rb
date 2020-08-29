@@ -87,9 +87,7 @@ module ContextualLogger
             if arg.nil?
               add(#{log_level}, nil, context, &block)
             elsif block
-              add(#{log_level}, nil, context) do
-                "\#{ContextualLogger.normalize_message(arg)}: \#{ContextualLogger.normalize_message(block.call)}"
-              end
+              add(#{log_level}, nil, context.merge(progname: arg), &block)
             else
               add(#{log_level}, arg, context)
             end
@@ -108,7 +106,11 @@ module ContextualLogger
         if arg1.nil?
           if block_given?
             message = yield
-            progname = arg2 || @progname
+            if arg2.nil? && context.has_key?(:progname)
+              progname = context[:progname] || @progname
+            else
+              progname = arg2 || @progname
+            end
           else
             message = arg2
             progname = @progname
@@ -138,22 +140,24 @@ module ContextualLogger
     end
 
     def format_message(severity, timestamp, progname, message, context: {})
+      normalized_message = ContextualLogger.normalize_message(message)
+      normalized_progname = ContextualLogger.normalize_message(progname) unless progname.nil?
       if @formatter
-        @formatter.call(severity, timestamp, progname, { message: ContextualLogger.normalize_message(message) }.merge!(context))
+        @formatter.call(severity, timestamp, normalized_progname, { message: normalized_message }.merge!(context))
       else
-        "#{basic_json_log_entry(severity, timestamp, progname, message, context: context)}\n"
+        "#{basic_json_log_entry(severity, timestamp, normalized_progname, normalized_message, context: context)}\n"
       end
     end
 
-    def basic_json_log_entry(severity, timestamp, progname, message, context:)
+    def basic_json_log_entry(severity, timestamp, normalized_progname, normalized_message, context:)
       message_hash = {
-        message:   ContextualLogger.normalize_message(message),
+        message: normalized_progname ? "#{normalized_progname}: #{normalized_message}" : normalized_message,
         severity:  severity,
         timestamp: timestamp
       }
-      message_hash[:progname] = progname if progname
+      message_hash[:progname] = normalized_progname if normalized_progname
 
-      # using merge! instead of merge for speed of operation
+      # merge! is faster and OK here since message_hash is still local only to this method
       message_hash.merge!(context).to_json
     end
   end
