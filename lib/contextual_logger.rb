@@ -100,6 +100,8 @@ module ContextualLogger
       severity >= level
     end
 
+    # Note that this interface needs to stay compatible with the underlying ::Logger#add interface,
+    # which is: def add(severity, message = nil, progname = nil)
     def add(arg_severity, arg1 = nil, arg2 = nil, **context)   # Ruby will prefer to match hashes up to last ** argument
       severity = arg_severity || UNKNOWN
       if log_level_enabled?(severity)
