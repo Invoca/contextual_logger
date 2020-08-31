@@ -205,8 +205,16 @@ describe ContextualLogger do
       let(:message) { 'request: this is a test' }
 
       it 'handles message block (inline context) with progname' do
-        expect_log_line_to_be_written(expected_log_hash.merge(progname: 'request').to_json)
+        formatter_args = []
+        logger.formatter = -> (*args) do
+          formatter_args = args
+          '"message"'
+        end
+        expect_log_line_to_be_written('"message"')
         expect(logger.info('request', service: 'test_service') { 'this is a test' }).to eq(true)
+
+        expect(formatter_args[2]).to eq('request')
+        expect(formatter_args[3]).to eq(message: "this is a test", service: "test_service")
       end
     end
 
