@@ -1,5 +1,9 @@
 # frozen_string_literal: true
 
+require 'active_support/core_ext/hash/keys'
+require 'pry'
+require 'pry-byebug'
+
 module ContextualLogger
   # A logger that deep_merges additional context and then delegates to the given logger.
   # Keeps it own log level (called override_level) that may be set independently of the logger it delegates to.
@@ -13,7 +17,8 @@ module ContextualLogger
       logger.is_a?(LoggerMixin) or raise ArgumentError, "logger must include ContextualLogger::LoggerMixin (got #{logger.inspect})"
       @logger = logger
       self.level = level
-      @context = context
+      binding.pry
+      @context = normalize_context(context)
       @merged_context_cache = {}  # so we don't have to merge every time
     end
 
@@ -34,6 +39,24 @@ module ContextualLogger
         end
 
       @logger.write_entry_to_log(severity, timestamp, progname, message, context: merged_context)
+    end
+
+    def normalize_context(context)
+      if warn_on_string_keys(context)
+        context.deep_symbolize_keys
+      else
+        context
+      end
+    end
+
+    def warn_on_string_keys(context)
+      if deep_key_has_string?(context)
+        ActiveSupport::Deprecation.warn('Context keys must use symbols not strings. This will be asserted as of contextual_logger v1.0.0')
+      end
+    end
+
+    def deep_key_has_string?(hash)
+      hash.keys.any? { |key| key.is_a? String } || hash.any? { |key, value| deep_key_has_string?(value) if value.is_a? Hash }
     end
 
     class << self
