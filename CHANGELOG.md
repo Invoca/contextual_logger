@@ -31,7 +31,7 @@ including where `progname` and `message` are types other than `String`.
 ## [0.9.0] - 2020-08-17
 ### Removed
 - Removed unnecessary duplicate context (`severity`, `timestamp`, and `progname`) in message hash passed to formatter. These
-are already passed to the formatter as arguments so that the formatter and decided how to add them to the log line.
+are already passed to the formatter as arguments so that the formatter can decide how to add them to the log line.
 
 ## [0.8.0] - 2020-05-15
 ### Added
