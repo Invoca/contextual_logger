@@ -53,7 +53,7 @@ module ContextualLogger
     end
 
     def deep_key_has_string?(hash)
-      hash.keys.any? { |key| key.is_a? String } || hash.any? { |key, value| deep_key_has_string?(value) if value.is_a? Hash }
+      hash.keys.any? { |key| key.is_a? String } || hash.any? { |_key, value| deep_key_has_string?(value) if value.is_a? Hash }
     end
 
     class << self
