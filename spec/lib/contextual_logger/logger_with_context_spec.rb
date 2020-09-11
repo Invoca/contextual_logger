@@ -99,6 +99,20 @@ describe ContextualLogger::LoggerWithContext do
       end
     end
 
+    context "when string passed as context key" do
+      it "returns context with a symbol key" do
+        context_with_string_key = { "log_source"=>"redis_client" }
+        expect(logger_with_context.normalize_context(context_with_string_key)).to eq(log_source: "redis_client" )
+        context_with_string_key_levels = { :log_source=>{:level1=>{ :level2=>{ "level3"=>"redis_client" } } } }
+        expect(logger_with_context.normalize_context(context_with_string_key_levels)).to eq({ :log_source=>{:level1=>{ :level2=>{ :level3=>"redis_client" } } } } )
+      end
+
+      it "should return a deprecation warning" do
+        context_with_string_key = { "log_source"=>"redis_client" }
+        expect(logger_with_context.warn_on_string_keys(context_with_string_key)).to match(/DEPRECATION WARNING: Context keys must use symbols not strings/)
+      end
+    end
+
     context "when base logger doesn't include LoggerMixin" do
       let(:base_logger) { Object.new }
 
