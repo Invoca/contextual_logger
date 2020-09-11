@@ -55,7 +55,7 @@ module ContextualLogger
     def deep_key_has_string?(hash)
       hash.any? do |key, value|
         key.is_a?(String) ||
-            (value.is_a?(Hash) && deep_key_has_string?(value))
+          (value.is_a?(Hash) && deep_key_has_string?(value))
       end
     end
 
