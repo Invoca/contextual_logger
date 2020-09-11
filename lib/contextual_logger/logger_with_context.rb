@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 require 'active_support/core_ext/hash/keys'
-require 'pry'
-require 'pry-byebug'
 
 module ContextualLogger
   # A logger that deep_merges additional context and then delegates to the given logger.
@@ -17,7 +15,6 @@ module ContextualLogger
       logger.is_a?(LoggerMixin) or raise ArgumentError, "logger must include ContextualLogger::LoggerMixin (got #{logger.inspect})"
       @logger = logger
       self.level = level
-      binding.pry
       @context = normalize_context(context)
       @merged_context_cache = {}  # so we don't have to merge every time
     end
