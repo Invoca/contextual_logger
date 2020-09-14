@@ -38,6 +38,8 @@ module ContextualLogger
       @logger.write_entry_to_log(severity, timestamp, progname, message, context: merged_context)
     end
 
+    private
+
     def normalize_context(context)
       if warn_on_string_keys(context)
         context.deep_symbolize_keys
