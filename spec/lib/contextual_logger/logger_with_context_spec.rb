@@ -110,7 +110,7 @@ describe ContextualLogger::LoggerWithContext do
         context_with_string_key_levels = { :log_source => { :level1 => { :level2 => { "level3" => "redis_client" } } } }
         string_context = ContextualLogger::LoggerWithContext.new(base_logger, context_with_string_key_levels)
         expect(string_context.context)
-          .to eq({ :log_source => { level1: { level2: { level3: "redis_client" } } } })
+          .to eq({ log_source: { level1: { level2: { level3: "redis_client" } } } })
       end
 
       it "should return a deprecation warning" do
