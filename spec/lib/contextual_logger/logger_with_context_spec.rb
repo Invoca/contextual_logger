@@ -103,6 +103,9 @@ describe ContextualLogger::LoggerWithContext do
       it "returns context with a symbol key" do
         context_with_string_key = { "log_source" => "redis_client" }
         expect(logger_with_context.normalize_context(context_with_string_key)).to eq(log_source: "redis_client" )
+      end
+
+      it "returns a deep context with symbol key" do
         context_with_string_key_levels = { :log_source => { :level1 => { :level2 => { "level3" => "redis_client" } } } }
         expect(logger_with_context.normalize_context(context_with_string_key_levels))
             .to eq({ :log_source => { :level1 => { :level2 => { :level3 => "redis_client" } } } })
