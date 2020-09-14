@@ -114,7 +114,7 @@ describe ContextualLogger::LoggerWithContext do
       end
 
       it "should return a deprecation warning" do
-        context_with_string_key = { "log_source"=>"redis_client" }
+        context_with_string_key = { "log_source" => "redis_client" }
         expect { ContextualLogger::LoggerWithContext.new(base_logger, context_with_string_key) }
           .to output(/DEPRECATION WARNING: Context keys must use symbols not strings/).to_stderr
       end
