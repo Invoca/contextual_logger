@@ -103,20 +103,20 @@ describe ContextualLogger::LoggerWithContext do
       it "returns context with a symbol key" do
         context_with_string_key = { "log_source" => "redis_client" }
         string_context = ContextualLogger::LoggerWithContext.new(base_logger, context_with_string_key)
-        expect(string_context.context).to eq(log_source: "redis_client" )
+        expect(string_context.context).to eq(log_source: "redis_client")
       end
 
       it "returns a deep context with symbol key" do
         context_with_string_key_levels = { :log_source => { :level1 => { :level2 => { "level3" => "redis_client" } } } }
         string_context = ContextualLogger::LoggerWithContext.new(base_logger, context_with_string_key_levels)
         expect(string_context.context)
-            .to eq({ :log_source => { :level1 => { :level2 => { :level3 => "redis_client" } } } })
+          .to eq({ :log_source => { level1: { level2: { level3: "redis_client" } } } })
       end
 
       it "should return a deprecation warning" do
         context_with_string_key = { "log_source"=>"redis_client" }
         expect { ContextualLogger::LoggerWithContext.new(base_logger, context_with_string_key) }
-            .to output(/DEPRECATION WARNING: Context keys must use symbols not strings/).to_stderr
+          .to output(/DEPRECATION WARNING: Context keys must use symbols not strings/).to_stderr
       end
     end
 
