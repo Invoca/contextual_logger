@@ -5,6 +5,7 @@ require 'active_support/core_ext/module/delegation'
 require 'json'
 require_relative './contextual_logger/redactor'
 require_relative './contextual_logger/context/handler'
+require_relative './contextual_logger/context/registry'
 
 module ContextualLogger
   LOG_LEVEL_NAMES_TO_SEVERITY =
@@ -44,6 +45,11 @@ module ContextualLogger
 
   module LoggerMixin
     delegate :register_secret, to: :redactor
+
+    def configure_context(&block)
+      block or raise ArgumentError, 'Block of context definitions was not passed'
+      @context_registry = Context::Registry.new(&block)
+    end
 
     def global_context=(context)
       Context::Handler.new(context).set!
