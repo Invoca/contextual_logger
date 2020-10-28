@@ -173,7 +173,7 @@ contextual_logger.register_context do
   # This makes it so that the logger will not raise a MissingDefinitionError
   # when code tries to apply a context key that does not map to a definition
   # in the registry
-  raise_on_definition_missing false
+  raise_on_missing_definition false
 
   string :service_name
 
@@ -194,13 +194,13 @@ end
 ### Production Best Practices
 
 In `production` environments it is best to protect your logging from excess bloat by
-setting `strict` to `true`, and `raise_on_definition_missing` to `false` in order
+setting `strict` to `true`, and `raise_on_missing_definition` to `false` in order
 to protect against logging causing unnecessary errors.
 
 ```ruby
 contextual_logger.register_context do
   strict true
-  raise_on_definition_missing false
+  raise_on_missing_definition false
 end
 ```
 
@@ -208,12 +208,12 @@ end
 
 When running in `test` and `development` environments it is best to be quickly aware
 that context is being erroniously added to the logs by setting both `strict` and
-`raise_on_definition_missing` to `true`.
+`raise_on_missing_definition` to `true`.
 
 ```ruby
 contextual_logger.register_context do
   strict true
-  raise_on_definition_missing true
+  raise_on_missing_definition true
 end
 ```
 
@@ -221,8 +221,8 @@ end
 
 | Config | Description | Default |
 | ------ | :---------: | ------: |
-| `strict` | | `true` |
-| `raise_on_definition_missing` | | `true` |
+| `strict` | When enabled the logger will enforce the shape of the context specified by dropping context keys that are not definied and running formatters across the data | `true` |
+| `raise_on_missing_definition` | When enabled, the logger will raise and exception if a context key is added to the logger that does not have a definition defined | `true` |
 
 ### Available Definitions
 
