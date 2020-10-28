@@ -56,7 +56,12 @@ module ContextualLogger
     end
 
     def with_context(context)
-      context_handler = Context::Handler.new(current_context_for_thread.deep_merge(context))
+      context_handler = Context::Handler.new(
+        current_context_for_thread.deep_merge(
+          context_registry.format(context)
+        )
+      )
+
       context_handler.set!
       if block_given?
         begin
