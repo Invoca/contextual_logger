@@ -272,6 +272,92 @@ describe ContextualLogger do
         expect(logger.fatal('this is a test', service: 'test_service')).to eq(true)
       end
     end
+
+    context 'when a context registry has been applied in strict mode' do
+      before do
+        logger.register_context do
+          strict true
+
+          string :service
+          string :file
+
+          hash :kubernetes do
+            string :context
+            string :namespace
+            number :port
+          end
+        end
+
+        expect_log_line_to_be_written(expected_log_hash.to_json)
+      end
+
+      subject { logger.info('this is a test', **log_context) }
+
+      context 'when inline context is applying only registered context' do
+        let(:log_context) do
+          { service: 'test_service' }
+        end
+
+        let(:expected_log_hash) do
+          {
+            service: 'test_service',
+            message: 'this is a test',
+            timestamp: Time.now,
+            severity: "INFO"
+          }
+        end
+
+        it { should be_truthy }
+      end
+
+      context 'when inline context is applying non registered context' do
+        let(:log_context) do
+          { service: 'test_service', non_registered: 'test_service' }
+        end
+
+        let(:expected_log_hash) do
+          {
+            service: 'test_service',
+            message: 'this is a test',
+            timestamp: Time.now,
+            severity: "INFO"
+          }
+        end
+
+        it { should be_truthy }
+      end
+
+      context 'when inline context is applying nested registered content' do
+        let(:log_context) do
+          {
+            service: 'test_service',
+            non_registered: 'filter_me_out',
+            kubernetes: {
+              context: 'hello',
+              namespace: 'world',
+              port: '1232',
+              kubernetes_non_registered: 'filter_me_out'
+            }
+          }
+        end
+
+        let(:expected_log_hash) do
+          {
+            service: 'test_service',
+            kubernetes: {
+              context: 'hello',
+              namespace: 'world',
+              port: 1232
+            },
+            message: 'this is a test',
+            timestamp: Time.now,
+            severity: "INFO"
+          }
+        end
+
+        it { should be_truthy }
+      end
+    end
   end
 
   describe 'with_context block' do
