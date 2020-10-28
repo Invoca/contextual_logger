@@ -100,6 +100,10 @@ describe ContextualLogger::LoggerWithContext do
     end
 
     context "when string passed as context key" do
+      before do
+        expect(ActiveSupport::Deprecation).to receive(:warn).with('Context keys must use symbols not strings. This will be asserted as of contextual_logger v1.0.0').and_return(true)
+      end
+
       it "returns context with a symbol key" do
         context_with_string_key = { "log_source" => "redis_client" }
         string_context = ContextualLogger::LoggerWithContext.new(base_logger, context_with_string_key)
@@ -111,12 +115,6 @@ describe ContextualLogger::LoggerWithContext do
         string_context = ContextualLogger::LoggerWithContext.new(base_logger, context_with_string_key_levels)
         expect(string_context.context)
           .to eq({ log_source: { level1: { level2: { level3: "redis_client" } } } })
-      end
-
-      it "should return a deprecation warning" do
-        context_with_string_key = { "log_source" => "redis_client" }
-        expect { ContextualLogger::LoggerWithContext.new(base_logger, context_with_string_key) }
-          .to output(/DEPRECATION WARNING: Context keys must use symbols not strings/).to_stderr
       end
     end
 
