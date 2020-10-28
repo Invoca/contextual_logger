@@ -139,6 +139,10 @@ module ContextualLogger
 
     private
 
+    def context_registry
+      @context_registry ||= Context::Registry.new { strict false }
+    end
+
     def redactor
       @redactor ||= Redactor.new
     end
