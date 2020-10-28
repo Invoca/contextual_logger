@@ -43,6 +43,7 @@ end
 
 contextual_logger = ApplicationLogger.new(STDOUT)
 ```
+
 ## Ways to Set Context
 Context may be provided any of 3 ways. Typically, all 3 will be used together.
 
@@ -133,6 +134,105 @@ The above will produce the resulting log line:
 ```
 03/10/20 12:22:05.769 INFO Request sent with body { 'username': 'test_user', 'password': '<redacted>' }
 ```
+
+## Strictly Defining Context
+
+The introduction of dynamic context in logging introduces a couple new problems that
+need to be solved. First the strict definition of a structure for the logs so that
+unknown bloat is removed, and second the strict definition of data types so that when
+the data arrives at the end data store it arrives in the right format for injestion.
+
+This is why this gem has the ability to strictly define the context that is expected by
+registering the schema of the logger.
+
+### Basic Example
+
+In this basic example, we are configuring the logger to:
+
+1. Strictly manage the context based on the definitions present
+2. **Not** raise exceptions when missing definitions are encountered
+3. Expect a basic log context to be applied contining:
+    1. A `service_name` string
+    2. A `kubernetes` hash containing:
+        1. A `namespace` string
+        2. A `context` string
+        3. A `pod_name` string
+  3. A `user` hash containing:
+      1. A numerical `id`
+      2. An `email` string
+      3. A `created_at` date object
+
+```ruby
+contextual_logger.register_context do
+  # This makes it so that the logger will enforce the shape and formating
+  # defined within the Context::Registry, stripping out any context keys
+  # that are not defined in the registry, and enforcing formatting rules
+  # on all values
+  strict true
+
+  # This makes it so that the logger will not raise a MissingDefinitionError
+  # when code tries to apply a context key that does not map to a definition
+  # in the registry
+  raise_on_definition_missing false
+
+  string :service_name
+
+  hash :kubernetes do
+    string :namespace
+    string :context
+    string :pod_name
+  end
+
+  hash :user do
+    number :id
+    string :email
+    date   :created_at
+  end
+end
+```
+
+### Production Best Practices
+
+In `production` environments it is best to protect your logging from excess bloat by
+setting `strict` to `true`, and `raise_on_definition_missing` to `false` in order
+to protect against logging causing unnecessary errors.
+
+```ruby
+contextual_logger.register_context do
+  strict true
+  raise_on_definition_missing false
+end
+```
+
+### Test and Development Best Practices
+
+When running in `test` and `development` environments it is best to be quickly aware
+that context is being erroniously added to the logs by setting both `strict` and
+`raise_on_definition_missing` to `true`.
+
+```ruby
+contextual_logger.register_context do
+  strict true
+  raise_on_definition_missing true
+end
+```
+
+### Available Configurations
+
+| Config | Description | Default |
+| ------ | :---------: | ------: |
+| `strict` | | `true` |
+| `raise_on_definition_missing` | | `true` |
+
+### Available Definitions
+
+| Config    | Description | Default Format |
+| --------- | :---------: | :-----: |
+| `string`  | The provided key will be formatted and enforced as a String | `:to_s` |
+| `number`  | The provided key will be formatted and enforced as a numeric value | `:to_i` |
+| `boolean` | The provided key will be formatted and enforced as a boolean value | `->(value) { value ? true : false }` |
+| `date`    | The provided key will be formatted and enforced as a date string | `->(value) { value.iso8601(6) }` |
+| `hash`    | The provided key will be formatted and enforced as a hash | |
 
 ## Overrides
 ### ActiveSupport::TaggedLogging
