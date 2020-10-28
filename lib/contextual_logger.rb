@@ -46,7 +46,7 @@ module ContextualLogger
   module LoggerMixin
     delegate :register_secret, to: :redactor
 
-    def configure_context(&block)
+    def register_context(&block)
       block or raise ArgumentError, 'Block of context definitions was not passed'
       @context_registry = Context::Registry.new(&block)
     end

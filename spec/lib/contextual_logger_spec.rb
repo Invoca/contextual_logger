@@ -26,10 +26,10 @@ describe ContextualLogger do
 
   it { is_expected.to respond_to(:with_context) }
 
-  context '#configure_context' do
+  context '#register_context' do
     context 'when a block is not given' do
       it 'raises an ArgumentError' do
-        expect { logger.configure_context }.to raise_error(ArgumentError, 'Block of context definitions was not passed')
+        expect { logger.register_context }.to raise_error(ArgumentError, 'Block of context definitions was not passed')
       end
     end
   end
