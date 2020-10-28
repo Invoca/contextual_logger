@@ -4,6 +4,7 @@ require_relative 'registry_types/string'
 require_relative 'registry_types/boolean'
 require_relative 'registry_types/number'
 require_relative 'registry_types/date'
+require_relative 'registry_types/hash'
 
 # This class is responsible for holding the registered context shape that will
 # be used by the Context::Handler to make sure that the context matches the shape
@@ -21,59 +22,31 @@ require_relative 'registry_types/date'
 
 module ContextualLogger
   module Context
-    class Registry
+    class Registry < RegistryTypes::Hash
       class DuplicateDefinitionError < StandardError; end
 
-      attr_reader :context_shape
-
       def initialize(&definitions)
-        @strict        = true
-        @context_shape = {}
-
-        run(&definitions)
+        @strict = true
+        super
       end
 
       def strict?
         @strict
       end
 
-      def context_shape_hash
-        context_shape.reduce({}) { |shape_hash, (key, value)| shape_hash.merge(key => value.to_h) }
+      alias context_shape to_h
+
+      def to_h
+        {
+          strict: @strict,
+          context_shape: context_shape
+        }
       end
 
       private
 
       def strict(value)
         @strict = value
-      end
-
-      def string(context_key, formatter: nil)
-        dedup(context_key, :string)
-        @context_shape[context_key] = RegistryTypes::String.new(formatter: formatter)
-      end
-
-      def boolean(context_key, formatter: nil)
-        dedup(context_key, :boolean)
-        @context_shape[context_key] = RegistryTypes::Boolean.new(formatter: formatter)
-      end
-
-      def number(context_key, formatter: nil)
-        dedup(context_key, :number)
-        @context_shape[context_key] = RegistryTypes::Number.new(formatter: formatter)
-      end
-
-      def date(context_key, formatter: nil)
-        dedup(context_key, :date)
-        @context_shape[context_key] = RegistryTypes::Date.new(formatter: formatter)
-      end
-
-      def run(&definitions)
-        instance_eval(&definitions)
-      end
-
-      def dedup(key, type)
-        @context_shape.include?(key) and
-          raise DuplicateDefinitionError, "Defining duplicate entry #{key} previously as #{@context_shape[key]} and now as #{type}"
       end
     end
   end

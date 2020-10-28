@@ -31,9 +31,9 @@ RSpec.describe ContextualLogger::Context::Registry do
     end
   end
 
-  context '#context_shape_hash' do
+  context '#context_shape' do
     let(:expected_context_shape) { {} }
-    subject { registry.context_shape_hash }
+    subject { registry.context_shape }
 
     context 'when defined with an empty block' do
       it { should be_empty }
@@ -120,6 +120,73 @@ RSpec.describe ContextualLogger::Context::Registry do
       itShouldDedupRegistry do
         date :test_context
         date :test_context
+      end
+    end
+
+    context 'when defining a hash' do
+      itShouldDedupRegistry do
+        hash :test_context do
+          string :test_sub_context
+        end
+
+        hash :test_context do
+          string :test_sub_context
+        end
+      end
+
+      context 'when defining a context entry' do
+        let(:registry) do
+          described_class.new do
+            hash :test_context do
+              string :test_sub_context
+            end
+          end
+        end
+
+        let(:expected_context_shape) do
+          {
+            test_context: {
+              test_sub_context: {
+                type: :string,
+                formatter: :to_s
+              }
+            }
+          }
+        end
+
+        it { should eq(expected_context_shape)}
+      end
+
+      context 'when defining nested context entries' do
+        let(:registry) do
+          described_class.new do
+            hash :test_context do
+              string :test_sub_context
+              hash :test_sub_context_hash do
+                number :test_sub_context_number
+              end
+            end
+          end
+        end
+
+        let(:expected_context_shape) do
+          {
+            test_context: {
+              test_sub_context: {
+                type: :string,
+                formatter: :to_s
+              },
+              test_sub_context_hash: {
+                test_sub_context_number: {
+                  type: :number,
+                  formatter: :to_i
+                }
+              }
+            }
+          }
+        end
+
+        it { should eq(expected_context_shape)}
       end
     end
   end
