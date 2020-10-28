@@ -237,40 +237,40 @@ describe ContextualLogger do
         end
       end
     end
-  end
 
-  describe 'inline context' do
-    let(:expected_log_hash) do
-      {
-        service: 'test_service',
-        message: 'this is a test',
-        timestamp: Time.now
-      }
-    end
+    context "with different log levels" do
+      let(:expected_log_hash) do
+        {
+          service: 'test_service',
+          message: 'this is a test',
+          timestamp: Time.now
+        }
+      end
 
-    it 'prints out context passed into debug' do
-      expect_log_line_to_be_written(expected_log_hash.merge(severity: 'DEBUG').to_json)
-      expect(logger.debug('this is a test', service: 'test_service')).to eq(true)
-    end
+      it 'prints out context passed into debug' do
+        expect_log_line_to_be_written(expected_log_hash.merge(severity: 'DEBUG').to_json)
+        expect(logger.debug('this is a test', service: 'test_service')).to eq(true)
+      end
 
-    it 'prints out context passed into info' do
-      expect_log_line_to_be_written(expected_log_hash.merge(severity: 'INFO').to_json)
-      expect(logger.info('this is a test', service: 'test_service')).to eq(true)
-    end
+      it 'prints out context passed into info' do
+        expect_log_line_to_be_written(expected_log_hash.merge(severity: 'INFO').to_json)
+        expect(logger.info('this is a test', service: 'test_service')).to eq(true)
+      end
 
-    it 'prints out context passed into warn' do
-      expect_log_line_to_be_written(expected_log_hash.merge(severity: 'WARN').to_json)
-      expect(logger.warn('this is a test', service: 'test_service')).to eq(true)
-    end
+      it 'prints out context passed into warn' do
+        expect_log_line_to_be_written(expected_log_hash.merge(severity: 'WARN').to_json)
+        expect(logger.warn('this is a test', service: 'test_service')).to eq(true)
+      end
 
-    it 'prints out context passed into error' do
-      expect_log_line_to_be_written(expected_log_hash.merge(severity: 'ERROR').to_json)
-      expect(logger.error('this is a test', service: 'test_service')).to eq(true)
-    end
+      it 'prints out context passed into error' do
+        expect_log_line_to_be_written(expected_log_hash.merge(severity: 'ERROR').to_json)
+        expect(logger.error('this is a test', service: 'test_service')).to eq(true)
+      end
 
-    it 'prints out context passed into fatal' do
-      expect_log_line_to_be_written(expected_log_hash.merge(severity: 'FATAL').to_json)
-      expect(logger.fatal('this is a test', service: 'test_service')).to eq(true)
+      it 'prints out context passed into fatal' do
+        expect_log_line_to_be_written(expected_log_hash.merge(severity: 'FATAL').to_json)
+        expect(logger.fatal('this is a test', service: 'test_service')).to eq(true)
+      end
     end
   end
 
