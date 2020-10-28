@@ -273,10 +273,11 @@ describe ContextualLogger do
       end
     end
 
-    context 'when a context registry has been applied in strict mode' do
+    context 'when a context registry has been applied in strict mode and raise_on_missing_definition disabled' do
       before do
         logger.register_context do
           strict true
+          raise_on_missing_definition false
 
           string :service
           string :file
@@ -293,7 +294,7 @@ describe ContextualLogger do
 
       subject { logger.info('this is a test', **log_context) }
 
-      context 'when inline context is applying only registered context' do
+      context 'when applying only registered context' do
         let(:log_context) do
           { service: 'test_service' }
         end
@@ -310,7 +311,7 @@ describe ContextualLogger do
         it { should be_truthy }
       end
 
-      context 'when inline context is applying non registered context' do
+      context 'when applying non registered context' do
         let(:log_context) do
           { service: 'test_service', non_registered: 'test_service' }
         end
@@ -327,7 +328,7 @@ describe ContextualLogger do
         it { should be_truthy }
       end
 
-      context 'when inline context is applying nested registered content' do
+      context 'when applying nested registered content' do
         let(:log_context) do
           {
             service: 'test_service',
@@ -356,6 +357,73 @@ describe ContextualLogger do
         end
 
         it { should be_truthy }
+      end
+    end
+
+    context 'when a context registry has been applied in strict mode and raise_on_missing_definition enabled' do
+      before do
+        logger.register_context do
+          strict true
+          raise_on_missing_definition true
+
+          string :service
+          string :file
+
+          hash :kubernetes do
+            string :context
+            string :namespace
+            number :port
+          end
+        end
+      end
+
+      subject { logger.info('this is a test', **log_context) }
+
+      context 'when applying only registered context' do
+        let(:log_context) do
+          { service: 'test_service' }
+        end
+
+        let(:expected_log_hash) do
+          {
+            service: 'test_service',
+            message: 'this is a test',
+            timestamp: Time.now,
+            severity: "INFO"
+          }
+        end
+
+        before { expect_log_line_to_be_written(expected_log_hash.to_json) }
+
+        it { should be_truthy }
+      end
+
+      context 'when applying non registered context' do
+        let(:log_context) do
+          { service: 'test_service', non_registered: 'test_service' }
+        end
+
+        it 'raises a MissingDefinitionError' do
+          expect { subject }.to raise_error(ContextualLogger::Context::Registry::MissingDefinitionError)
+        end
+      end
+
+      context 'when applying nested registered content' do
+        let(:log_context) do
+          {
+            service: 'test_service',
+            kubernetes: {
+              context: 'hello',
+              namespace: 'world',
+              port: '1232',
+              kubernetes_non_registered: 'filter_me_out'
+            }
+          }
+        end
+
+        it 'raises a MissingDefinitionError' do
+          expect { subject }.to raise_error(ContextualLogger::Context::Registry::MissingDefinitionError)
+        end
       end
     end
   end
@@ -456,10 +524,11 @@ describe ContextualLogger do
       handler1.reset!
     end
 
-    context 'when a context registry has been applied in strict mode' do
+    context 'when a context registry has been applied in strict mode and raise_on_missing_definition is disabled' do
       before do
         logger.register_context do
           strict true
+          raise_on_missing_definition false
 
           string :service
           string :file
@@ -477,7 +546,7 @@ describe ContextualLogger do
       context 'logger#current_context_for_thread' do
         subject { logger.current_context_for_thread }
 
-        context 'when global context is applying only registered context' do
+        context 'when applying only registered context' do
           let(:log_context) do
             { service: 'test_service' }
           end
@@ -489,7 +558,7 @@ describe ContextualLogger do
           it { should eq(expected_current_context) }
         end
 
-        context 'when global context is applying non registered context' do
+        context 'when applying non registered context' do
           let(:log_context) do
             { service: 'test_service', non_registered: 'test_service' }
           end
@@ -501,7 +570,7 @@ describe ContextualLogger do
           it { should eq(expected_current_context) }
         end
 
-        context 'when global context is applying nested registered content' do
+        context 'when applying nested registered content' do
           let(:log_context) do
             {
               service: 'test_service',
@@ -527,6 +596,62 @@ describe ContextualLogger do
           end
 
           it { should eq(expected_current_context) }
+        end
+      end
+    end
+
+    context 'when a context registry has been applied in strict mode and raise_on_missing_definition is enabled' do
+      before do
+        logger.register_context do
+          strict true
+          raise_on_missing_definition true
+
+          string :service
+          string :file
+
+          hash :kubernetes do
+            string :context
+            string :namespace
+            number :port
+          end
+        end
+      end
+
+      subject { logger.with_context(log_context) }
+
+      context 'when applying only registered context' do
+        let(:log_context) do
+          { service: 'test_service' }
+        end
+
+        it { should be_truthy }
+      end
+
+      context 'when applying non registered context' do
+        let(:log_context) do
+          { service: 'test_service', non_registered: 'test_service' }
+        end
+
+        it 'raises a MissingDefinitionError' do
+          expect { subject }.to raise_error(ContextualLogger::Context::Registry::MissingDefinitionError)
+        end
+      end
+
+      context 'when applying nested registered content' do
+        let(:log_context) do
+          {
+            service: 'test_service',
+            kubernetes: {
+              context: 'hello',
+              namespace: 'world',
+              port: '1232',
+              kubernetes_non_registered: 'filter_me_out'
+            }
+          }
+        end
+
+        it 'raises a MissingDefinitionError' do
+          expect { subject }.to raise_error(ContextualLogger::Context::Registry::MissingDefinitionError)
         end
       end
     end
@@ -563,10 +688,11 @@ describe ContextualLogger do
       end
     end
 
-    context 'when a context registry has been applied in strict mode' do
+    context 'when a context registry has been applied in strict mode and raise_on_missing_definition is disabled' do
       before do
         logger.register_context do
           strict true
+          raise_on_missing_definition false
 
           string :service
           string :file
@@ -584,7 +710,7 @@ describe ContextualLogger do
       context 'logger#current_context_for_thread' do
         subject { logger.current_context_for_thread }
 
-        context 'when global context is applying only registered context' do
+        context 'when applying only registered context' do
           let(:global_context) do
             { service: 'test_service' }
           end
@@ -596,7 +722,7 @@ describe ContextualLogger do
           it { should eq(expected_current_context) }
         end
 
-        context 'when global context is applying non registered context' do
+        context 'when applying non registered context' do
           let(:global_context) do
             { service: 'test_service', non_registered: 'test_service' }
           end
@@ -608,7 +734,7 @@ describe ContextualLogger do
           it { should eq(expected_current_context) }
         end
 
-        context 'when global context is applying nested registered content' do
+        context 'when applying nested registered content' do
           let(:global_context) do
             {
               service: 'test_service',
@@ -634,6 +760,62 @@ describe ContextualLogger do
           end
 
           it { should eq(expected_current_context) }
+        end
+      end
+    end
+
+    context 'when a context registry has been applied in strict mode and raise_on_missing_definition is enabled' do
+      before do
+        logger.register_context do
+          strict true
+          raise_on_missing_definition true
+
+          string :service
+          string :file
+
+          hash :kubernetes do
+            string :context
+            string :namespace
+            number :port
+          end
+        end
+      end
+
+      subject { logger.global_context = global_context }
+
+      context 'when applying only registered context' do
+        let(:global_context) do
+          { service: 'test_service' }
+        end
+
+        it { should be_truthy }
+      end
+
+      context 'when applying non registered context' do
+        let(:global_context) do
+          { service: 'test_service', non_registered: 'test_service' }
+        end
+
+        it 'raises a MissingDefinitionError' do
+          expect { subject }.to raise_error(ContextualLogger::Context::Registry::MissingDefinitionError)
+        end
+      end
+
+      context 'when applying nested registered content' do
+        let(:global_context) do
+          {
+            service: 'test_service',
+            kubernetes: {
+              context: 'hello',
+              namespace: 'world',
+              port: '1232',
+              kubernetes_non_registered: 'filter_me_out'
+            }
+          }
+        end
+
+        it 'raises a MissingDefinitionError' do
+          expect { subject }.to raise_error(ContextualLogger::Context::Registry::MissingDefinitionError)
         end
       end
     end

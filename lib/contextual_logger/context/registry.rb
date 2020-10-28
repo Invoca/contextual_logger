@@ -7,7 +7,8 @@ require_relative 'registry_types/date'
 require_relative 'registry_types/hash'
 
 # This class is responsible for holding the registered context shape that will
-# be used by the Context::Handler to make sure that the context matches the shape
+# be used by the LoggerMixin to make sure that the context matches the shape
+# defined
 
 # logger.configure_context do
 #   strict false
@@ -24,9 +25,12 @@ module ContextualLogger
   module Context
     class Registry < RegistryTypes::Hash
       class DuplicateDefinitionError < StandardError; end
+      class MissingDefinitionError < StandardError; end
 
       def initialize(&definitions)
-        @strict = true
+        @strict                        = true
+        @raise_on_missing_definition = true
+
         super
       end
 
@@ -34,9 +38,13 @@ module ContextualLogger
         @strict
       end
 
+      def raise_on_missing_definition?
+        @raise_on_missing_definition
+      end
+
       def format(context)
         if strict?
-          super
+          super(context, raise_on_missing_definition?)
         else
           context
         end
@@ -55,6 +63,10 @@ module ContextualLogger
 
       def strict(value)
         @strict = value
+      end
+
+      def raise_on_missing_definition(value)
+        @raise_on_missing_definition = value
       end
     end
   end

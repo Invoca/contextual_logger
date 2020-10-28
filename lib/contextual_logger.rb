@@ -145,7 +145,10 @@ module ContextualLogger
     private
 
     def context_registry
-      @context_registry ||= Context::Registry.new { strict false }
+      @context_registry ||= Context::Registry.new do
+        strict false
+        raise_on_missing_definition false
+      end
     end
 
     def redactor

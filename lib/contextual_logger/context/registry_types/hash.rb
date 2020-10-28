@@ -21,10 +21,16 @@ module ContextualLogger
           end
         end
 
-        def format(context)
+        def format(context, raise_on_missing_definition)
           context.reduce({}) do |formatted_context, (key, value)|
             if (definition = @definitions[key])
-              formatted_context[key] = definition.format(value)
+              formatted_context[key] = if definition.is_a?(RegistryTypes::Hash)
+                                         definition.format(value, raise_on_missing_definition)
+                                       else
+                                         definition.format(value)
+                                       end
+            elsif raise_on_missing_definition
+              raise Registry::MissingDefinitionError, "Attempting to apply context #{key} that is missing a definition in the registry"
             end
 
             formatted_context

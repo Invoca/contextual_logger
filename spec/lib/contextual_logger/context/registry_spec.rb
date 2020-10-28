@@ -31,6 +31,24 @@ RSpec.describe ContextualLogger::Context::Registry do
     end
   end
 
+  context '#raise_on_missing_definition?' do
+    subject { registry.raise_on_missing_definition? }
+
+    context 'when defined with an empty block' do
+      it { should be_truthy }
+    end
+
+    context 'when defined in the registry configuration as true' do
+      let(:registry) { described_class.new { raise_on_missing_definition true } }
+      it { should be_truthy }
+    end
+
+    context 'when defined in the registry configuration as false' do
+      let(:registry) { described_class.new { raise_on_missing_definition false } }
+      it { should be_falsey }
+    end
+  end
+
   context '#context_shape' do
     let(:expected_context_shape) { {} }
     subject { registry.context_shape }
