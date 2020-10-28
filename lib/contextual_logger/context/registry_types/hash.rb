@@ -21,6 +21,16 @@ module ContextualLogger
           end
         end
 
+        def format(context)
+          context.reduce({}) do |formatted_context, (key, value)|
+            if (definition = @definitions[key])
+              formatted_context[key] = definition.format(value)
+            end
+
+            formatted_context
+          end
+        end
+
         private
 
         def string(context_key, formatter: nil)

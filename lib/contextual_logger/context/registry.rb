@@ -34,6 +34,14 @@ module ContextualLogger
         @strict
       end
 
+      def format(context)
+        if strict?
+          super
+        else
+          context
+        end
+      end
+
       alias context_shape to_h
 
       def to_h

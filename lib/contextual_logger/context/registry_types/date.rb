@@ -13,6 +13,15 @@ module ContextualLogger
         def to_h
           { type: :date, formatter: formatter }
         end
+
+        def format(value)
+          case formatter
+          when Proc
+            formatter.call(value)
+          else
+            value.send(formatter)
+          end
+        end
       end
     end
   end

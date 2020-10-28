@@ -52,7 +52,7 @@ module ContextualLogger
     end
 
     def global_context=(context)
-      Context::Handler.new(context).set!
+      Context::Handler.new(context_registry.format(context)).set!
     end
 
     def with_context(context)

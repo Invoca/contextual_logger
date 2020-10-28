@@ -401,6 +401,81 @@ describe ContextualLogger do
         expect(logger.info('this is a test')).to eq(true)
       end
     end
+
+    context 'when a context registry has been applied in strict mode' do
+      before do
+        logger.register_context do
+          strict true
+
+          string :service
+          string :file
+
+          hash :kubernetes do
+            string :context
+            string :namespace
+            number :port
+          end
+        end
+
+        logger.global_context = global_context
+      end
+
+      context 'logger#current_context_for_thread' do
+        subject { logger.current_context_for_thread }
+
+        context 'when global context is applying only registered context' do
+          let(:global_context) do
+            { service: 'test_service' }
+          end
+
+          let(:expected_current_context) do
+            { service: 'test_service' }
+          end
+
+          it { should eq(expected_current_context) }
+        end
+
+        context 'when global context is applying non registered context' do
+          let(:global_context) do
+            { service: 'test_service', non_registered: 'test_service' }
+          end
+
+          let(:expected_current_context) do
+            { service: 'test_service' }
+          end
+
+          it { should eq(expected_current_context) }
+        end
+
+        context 'when global context is applying nested registered content' do
+          let(:global_context) do
+            {
+              service: 'test_service',
+              non_registered: 'filter_me_out',
+              kubernetes: {
+                context: 'hello',
+                namespace: 'world',
+                port: '1232',
+                kubernetes_non_registered: 'filter_me_out'
+              }
+            }
+          end
+
+          let(:expected_current_context) do
+            {
+              service: 'test_service',
+              kubernetes: {
+                context: 'hello',
+                namespace: 'world',
+                port: 1232
+              }
+            }
+          end
+
+          it { should eq(expected_current_context) }
+        end
+      end
+    end
   end
 
   describe 'with varying levels of context' do
