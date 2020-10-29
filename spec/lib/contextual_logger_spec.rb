@@ -26,6 +26,14 @@ describe ContextualLogger do
 
   it { is_expected.to respond_to(:with_context) }
 
+  context '#register_context' do
+    context 'when a block is not given' do
+      it 'raises an ArgumentError' do
+        expect { logger.register_context }.to raise_error(ArgumentError, 'Block of context definitions was not passed')
+      end
+    end
+  end
+
   context 'with logger writing to log_stream' do
     let(:log_stream) { StringIO.new }
     let(:log_level) { Logger::Severity::DEBUG }
@@ -229,40 +237,194 @@ describe ContextualLogger do
         end
       end
     end
-  end
 
-  describe 'inline context' do
-    let(:expected_log_hash) do
-      {
-        service: 'test_service',
-        message: 'this is a test',
-        timestamp: Time.now
-      }
+    context "with different log levels" do
+      let(:expected_log_hash) do
+        {
+          service: 'test_service',
+          message: 'this is a test',
+          timestamp: Time.now
+        }
+      end
+
+      it 'prints out context passed into debug' do
+        expect_log_line_to_be_written(expected_log_hash.merge(severity: 'DEBUG').to_json)
+        expect(logger.debug('this is a test', service: 'test_service')).to eq(true)
+      end
+
+      it 'prints out context passed into info' do
+        expect_log_line_to_be_written(expected_log_hash.merge(severity: 'INFO').to_json)
+        expect(logger.info('this is a test', service: 'test_service')).to eq(true)
+      end
+
+      it 'prints out context passed into warn' do
+        expect_log_line_to_be_written(expected_log_hash.merge(severity: 'WARN').to_json)
+        expect(logger.warn('this is a test', service: 'test_service')).to eq(true)
+      end
+
+      it 'prints out context passed into error' do
+        expect_log_line_to_be_written(expected_log_hash.merge(severity: 'ERROR').to_json)
+        expect(logger.error('this is a test', service: 'test_service')).to eq(true)
+      end
+
+      it 'prints out context passed into fatal' do
+        expect_log_line_to_be_written(expected_log_hash.merge(severity: 'FATAL').to_json)
+        expect(logger.fatal('this is a test', service: 'test_service')).to eq(true)
+      end
     end
 
-    it 'prints out context passed into debug' do
-      expect_log_line_to_be_written(expected_log_hash.merge(severity: 'DEBUG').to_json)
-      expect(logger.debug('this is a test', service: 'test_service')).to eq(true)
+    context 'when a context registry has been applied in strict mode and raise_on_missing_definition disabled' do
+      before do
+        logger.register_context do
+          strict true
+          raise_on_missing_definition false
+
+          string :service
+          string :file
+
+          hash :kubernetes do
+            string :context
+            string :namespace
+            number :port
+          end
+        end
+
+        expect_log_line_to_be_written(expected_log_hash.to_json)
+      end
+
+      subject { logger.info('this is a test', **log_context) }
+
+      context 'when applying only registered context' do
+        let(:log_context) do
+          { service: 'test_service' }
+        end
+
+        let(:expected_log_hash) do
+          {
+            service: 'test_service',
+            message: 'this is a test',
+            timestamp: Time.now,
+            severity: "INFO"
+          }
+        end
+
+        it { should be_truthy }
+      end
+
+      context 'when applying non registered context' do
+        let(:log_context) do
+          { service: 'test_service', non_registered: 'test_service' }
+        end
+
+        let(:expected_log_hash) do
+          {
+            service: 'test_service',
+            message: 'this is a test',
+            timestamp: Time.now,
+            severity: "INFO"
+          }
+        end
+
+        it { should be_truthy }
+      end
+
+      context 'when applying nested registered content' do
+        let(:log_context) do
+          {
+            service: 'test_service',
+            non_registered: 'filter_me_out',
+            kubernetes: {
+              context: 'hello',
+              namespace: 'world',
+              port: '1232',
+              kubernetes_non_registered: 'filter_me_out'
+            }
+          }
+        end
+
+        let(:expected_log_hash) do
+          {
+            service: 'test_service',
+            kubernetes: {
+              context: 'hello',
+              namespace: 'world',
+              port: 1232
+            },
+            message: 'this is a test',
+            timestamp: Time.now,
+            severity: "INFO"
+          }
+        end
+
+        it { should be_truthy }
+      end
     end
 
-    it 'prints out context passed into info' do
-      expect_log_line_to_be_written(expected_log_hash.merge(severity: 'INFO').to_json)
-      expect(logger.info('this is a test', service: 'test_service')).to eq(true)
-    end
+    context 'when a context registry has been applied in strict mode and raise_on_missing_definition enabled' do
+      before do
+        logger.register_context do
+          strict true
+          raise_on_missing_definition true
 
-    it 'prints out context passed into warn' do
-      expect_log_line_to_be_written(expected_log_hash.merge(severity: 'WARN').to_json)
-      expect(logger.warn('this is a test', service: 'test_service')).to eq(true)
-    end
+          string :service
+          string :file
 
-    it 'prints out context passed into error' do
-      expect_log_line_to_be_written(expected_log_hash.merge(severity: 'ERROR').to_json)
-      expect(logger.error('this is a test', service: 'test_service')).to eq(true)
-    end
+          hash :kubernetes do
+            string :context
+            string :namespace
+            number :port
+          end
+        end
+      end
 
-    it 'prints out context passed into fatal' do
-      expect_log_line_to_be_written(expected_log_hash.merge(severity: 'FATAL').to_json)
-      expect(logger.fatal('this is a test', service: 'test_service')).to eq(true)
+      subject { logger.info('this is a test', **log_context) }
+
+      context 'when applying only registered context' do
+        let(:log_context) do
+          { service: 'test_service' }
+        end
+
+        let(:expected_log_hash) do
+          {
+            service: 'test_service',
+            message: 'this is a test',
+            timestamp: Time.now,
+            severity: "INFO"
+          }
+        end
+
+        before { expect_log_line_to_be_written(expected_log_hash.to_json) }
+
+        it { should be_truthy }
+      end
+
+      context 'when applying non registered context' do
+        let(:log_context) do
+          { service: 'test_service', non_registered: 'test_service' }
+        end
+
+        it 'raises a MissingDefinitionError' do
+          expect { subject }.to raise_error(ContextualLogger::Context::Registry::MissingDefinitionError)
+        end
+      end
+
+      context 'when applying nested registered content' do
+        let(:log_context) do
+          {
+            service: 'test_service',
+            kubernetes: {
+              context: 'hello',
+              namespace: 'world',
+              port: '1232',
+              kubernetes_non_registered: 'filter_me_out'
+            }
+          }
+        end
+
+        it 'raises a MissingDefinitionError' do
+          expect { subject }.to raise_error(ContextualLogger::Context::Registry::MissingDefinitionError)
+        end
+      end
     end
   end
 
@@ -361,6 +523,138 @@ describe ContextualLogger do
       expect(logger.info('this is a test')).to eq(true)
       handler1.reset!
     end
+
+    context 'when a context registry has been applied in strict mode and raise_on_missing_definition is disabled' do
+      before do
+        logger.register_context do
+          strict true
+          raise_on_missing_definition false
+
+          string :service
+          string :file
+
+          hash :kubernetes do
+            string :context
+            string :namespace
+            number :port
+          end
+        end
+
+        logger.with_context(log_context)
+      end
+
+      context 'logger#current_context_for_thread' do
+        subject { logger.current_context_for_thread }
+
+        context 'when applying only registered context' do
+          let(:log_context) do
+            { service: 'test_service' }
+          end
+
+          let(:expected_current_context) do
+            { service: 'test_service' }
+          end
+
+          it { should eq(expected_current_context) }
+        end
+
+        context 'when applying non registered context' do
+          let(:log_context) do
+            { service: 'test_service', non_registered: 'test_service' }
+          end
+
+          let(:expected_current_context) do
+            { service: 'test_service' }
+          end
+
+          it { should eq(expected_current_context) }
+        end
+
+        context 'when applying nested registered content' do
+          let(:log_context) do
+            {
+              service: 'test_service',
+              non_registered: 'filter_me_out',
+              kubernetes: {
+                context: 'hello',
+                namespace: 'world',
+                port: '1232',
+                kubernetes_non_registered: 'filter_me_out'
+              }
+            }
+          end
+
+          let(:expected_current_context) do
+            {
+              service: 'test_service',
+              kubernetes: {
+                context: 'hello',
+                namespace: 'world',
+                port: 1232
+              }
+            }
+          end
+
+          it { should eq(expected_current_context) }
+        end
+      end
+    end
+
+    context 'when a context registry has been applied in strict mode and raise_on_missing_definition is enabled' do
+      before do
+        logger.register_context do
+          strict true
+          raise_on_missing_definition true
+
+          string :service
+          string :file
+
+          hash :kubernetes do
+            string :context
+            string :namespace
+            number :port
+          end
+        end
+      end
+
+      subject { logger.with_context(log_context) }
+
+      context 'when applying only registered context' do
+        let(:log_context) do
+          { service: 'test_service' }
+        end
+
+        it { should be_truthy }
+      end
+
+      context 'when applying non registered context' do
+        let(:log_context) do
+          { service: 'test_service', non_registered: 'test_service' }
+        end
+
+        it 'raises a MissingDefinitionError' do
+          expect { subject }.to raise_error(ContextualLogger::Context::Registry::MissingDefinitionError)
+        end
+      end
+
+      context 'when applying nested registered content' do
+        let(:log_context) do
+          {
+            service: 'test_service',
+            kubernetes: {
+              context: 'hello',
+              namespace: 'world',
+              port: '1232',
+              kubernetes_non_registered: 'filter_me_out'
+            }
+          }
+        end
+
+        it 'raises a MissingDefinitionError' do
+          expect { subject }.to raise_error(ContextualLogger::Context::Registry::MissingDefinitionError)
+        end
+      end
+    end
   end
 
   describe 'global_context' do
@@ -391,6 +685,138 @@ describe ContextualLogger do
       expect_log_line_to_be_written(expected_log_hash.merge(file: 'this_file.json').to_json)
       logger.with_context(file: 'this_file.json') do
         expect(logger.info('this is a test')).to eq(true)
+      end
+    end
+
+    context 'when a context registry has been applied in strict mode and raise_on_missing_definition is disabled' do
+      before do
+        logger.register_context do
+          strict true
+          raise_on_missing_definition false
+
+          string :service
+          string :file
+
+          hash :kubernetes do
+            string :context
+            string :namespace
+            number :port
+          end
+        end
+
+        logger.global_context = global_context
+      end
+
+      context 'logger#current_context_for_thread' do
+        subject { logger.current_context_for_thread }
+
+        context 'when applying only registered context' do
+          let(:global_context) do
+            { service: 'test_service' }
+          end
+
+          let(:expected_current_context) do
+            { service: 'test_service' }
+          end
+
+          it { should eq(expected_current_context) }
+        end
+
+        context 'when applying non registered context' do
+          let(:global_context) do
+            { service: 'test_service', non_registered: 'test_service' }
+          end
+
+          let(:expected_current_context) do
+            { service: 'test_service' }
+          end
+
+          it { should eq(expected_current_context) }
+        end
+
+        context 'when applying nested registered content' do
+          let(:global_context) do
+            {
+              service: 'test_service',
+              non_registered: 'filter_me_out',
+              kubernetes: {
+                context: 'hello',
+                namespace: 'world',
+                port: '1232',
+                kubernetes_non_registered: 'filter_me_out'
+              }
+            }
+          end
+
+          let(:expected_current_context) do
+            {
+              service: 'test_service',
+              kubernetes: {
+                context: 'hello',
+                namespace: 'world',
+                port: 1232
+              }
+            }
+          end
+
+          it { should eq(expected_current_context) }
+        end
+      end
+    end
+
+    context 'when a context registry has been applied in strict mode and raise_on_missing_definition is enabled' do
+      before do
+        logger.register_context do
+          strict true
+          raise_on_missing_definition true
+
+          string :service
+          string :file
+
+          hash :kubernetes do
+            string :context
+            string :namespace
+            number :port
+          end
+        end
+      end
+
+      subject { logger.global_context = global_context }
+
+      context 'when applying only registered context' do
+        let(:global_context) do
+          { service: 'test_service' }
+        end
+
+        it { should be_truthy }
+      end
+
+      context 'when applying non registered context' do
+        let(:global_context) do
+          { service: 'test_service', non_registered: 'test_service' }
+        end
+
+        it 'raises a MissingDefinitionError' do
+          expect { subject }.to raise_error(ContextualLogger::Context::Registry::MissingDefinitionError)
+        end
+      end
+
+      context 'when applying nested registered content' do
+        let(:global_context) do
+          {
+            service: 'test_service',
+            kubernetes: {
+              context: 'hello',
+              namespace: 'world',
+              port: '1232',
+              kubernetes_non_registered: 'filter_me_out'
+            }
+          }
+        end
+
+        it 'raises a MissingDefinitionError' do
+          expect { subject }.to raise_error(ContextualLogger::Context::Registry::MissingDefinitionError)
+        end
       end
     end
   end

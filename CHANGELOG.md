@@ -4,6 +4,13 @@ Inspired by [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Note: this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.12.0] - Unreleased
+### Added
+- Added a new interface for defining the expected structure of the logger's context
+- Added the ability to strictly enforce the structure of the logger's context by
+removing all undefined context keys
+- Added the ability to raise when attempting to apply context with undefined keys
+
 ## [0.11.0] - 2020-09-15
 ### Changed
 - Updated contextual logger to normalize keys to symbols and warn on string keys

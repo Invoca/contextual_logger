@@ -5,6 +5,7 @@ require 'active_support/core_ext/module/delegation'
 require 'json'
 require_relative './contextual_logger/redactor'
 require_relative './contextual_logger/context/handler'
+require_relative './contextual_logger/context/registry'
 
 module ContextualLogger
   LOG_LEVEL_NAMES_TO_SEVERITY =
@@ -45,12 +46,22 @@ module ContextualLogger
   module LoggerMixin
     delegate :register_secret, to: :redactor
 
+    def register_context(&block)
+      block or raise ArgumentError, 'Block of context definitions was not passed'
+      @context_registry = Context::Registry.new(&block)
+    end
+
     def global_context=(context)
-      Context::Handler.new(context).set!
+      Context::Handler.new(context_registry.format(context)).set!
     end
 
     def with_context(context)
-      context_handler = Context::Handler.new(current_context_for_thread.deep_merge(context))
+      context_handler = Context::Handler.new(
+        current_context_for_thread.deep_merge(
+          context_registry.format(context)
+        )
+      )
+
       context_handler.set!
       if block_given?
         begin
@@ -117,7 +128,7 @@ module ContextualLogger
           message = arg1
           progname = arg2 || @progname
         end
-        write_entry_to_log(severity, Time.now, progname, message, context: current_context_for_thread.deep_merge(context))
+        write_entry_to_log(severity, Time.now, progname, message, context: current_context_for_thread.deep_merge(context_registry.format(context)))
       end
 
       true
@@ -132,6 +143,13 @@ module ContextualLogger
     end
 
     private
+
+    def context_registry
+      @context_registry ||= Context::Registry.new do
+        strict false
+        raise_on_missing_definition false
+      end
+    end
 
     def redactor
       @redactor ||= Redactor.new

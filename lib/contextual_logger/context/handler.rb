@@ -7,8 +7,10 @@ module ContextualLogger
 
       attr_reader :previous_context, :context
 
-      def self.current_context
-        Thread.current[THREAD_CONTEXT_NAMESPACE] || {}
+      class << self
+        def current_context
+          Thread.current[THREAD_CONTEXT_NAMESPACE] || {}
+        end
       end
 
       def initialize(context, previous_context: nil)
