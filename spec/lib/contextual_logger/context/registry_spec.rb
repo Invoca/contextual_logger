@@ -2,7 +2,7 @@
 
 require 'contextual_logger'
 
-def itShouldDedupRegistry(&block)
+def it_should_dedup_registry(&block)
   context 'when defining duplicate keys' do
     it 'raises a DuplicateDefinitionError' do
       expect { described_class.new(&block) }.to raise_error(ContextualLogger::Context::Registry::DuplicateDefinitionError)
@@ -11,7 +11,7 @@ def itShouldDedupRegistry(&block)
 end
 
 RSpec.describe ContextualLogger::Context::Registry do
-  let(:registry) { described_class.new {} }
+  let(:registry) { described_class.new { } }
 
   context '#strict?' do
     subject { registry.strict? }
@@ -69,10 +69,10 @@ RSpec.describe ContextualLogger::Context::Registry do
           { test_context: { type: :string, formatter: :to_s } }
         end
 
-        it { should eq(expected_context_shape)}
+        it { should eq(expected_context_shape) }
       end
 
-      itShouldDedupRegistry do
+      it_should_dedup_registry do
         string :test_context
         string :test_context
       end
@@ -90,10 +90,10 @@ RSpec.describe ContextualLogger::Context::Registry do
           { test_context: hash_including({ type: :boolean }) }
         end
 
-        it { should include(expected_context_shape)}
+        it { should include(expected_context_shape) }
       end
 
-      itShouldDedupRegistry do
+      it_should_dedup_registry do
         boolean :test_context
         boolean :test_context
       end
@@ -111,10 +111,10 @@ RSpec.describe ContextualLogger::Context::Registry do
           { test_context: { type: :number, formatter: :to_i } }
         end
 
-        it { should eq(expected_context_shape)}
+        it { should eq(expected_context_shape) }
       end
 
-      itShouldDedupRegistry do
+      it_should_dedup_registry do
         number :test_context
         number :test_context
       end
@@ -132,17 +132,17 @@ RSpec.describe ContextualLogger::Context::Registry do
           { test_context: hash_including({ type: :date }) }
         end
 
-        it { should include(expected_context_shape)}
+        it { should include(expected_context_shape) }
       end
 
-      itShouldDedupRegistry do
+      it_should_dedup_registry do
         date :test_context
         date :test_context
       end
     end
 
     context 'when defining a hash' do
-      itShouldDedupRegistry do
+      it_should_dedup_registry do
         hash :test_context do
           string :test_sub_context
         end
@@ -172,7 +172,7 @@ RSpec.describe ContextualLogger::Context::Registry do
           }
         end
 
-        it { should eq(expected_context_shape)}
+        it { should eq(expected_context_shape) }
       end
 
       context 'when defining nested context entries' do
@@ -204,7 +204,7 @@ RSpec.describe ContextualLogger::Context::Registry do
           }
         end
 
-        it { should eq(expected_context_shape)}
+        it { should eq(expected_context_shape) }
       end
     end
   end

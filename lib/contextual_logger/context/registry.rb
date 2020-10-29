@@ -28,7 +28,7 @@ module ContextualLogger
       class MissingDefinitionError < StandardError; end
 
       def initialize(&definitions)
-        @strict                        = true
+        @strict                      = true
         @raise_on_missing_definition = true
 
         super
@@ -61,11 +61,11 @@ module ContextualLogger
 
       private
 
-      def strict(value)
+      def strict(value) # rubocop:disable Style/TrivialAccessors
         @strict = value
       end
 
-      def raise_on_missing_definition(value)
+      def raise_on_missing_definition(value) # rubocop:disable Style/TrivialAccessors
         @raise_on_missing_definition = value
       end
     end
