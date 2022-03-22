@@ -85,11 +85,11 @@ module ContextualLogger
             add(#{log_level}, nil, arg, &block)
           else
             if arg.nil?
-              add(#{log_level}, nil, context, &block)
+              add(#{log_level}, nil, **context, &block)
             elsif block
-              add(#{log_level}, nil, context.merge(progname: arg), &block)
+              add(#{log_level}, nil, **context.merge(progname: arg), &block)
             else
-              add(#{log_level}, arg, context)
+              add(#{log_level}, arg, **context)
             end
           end
         end
