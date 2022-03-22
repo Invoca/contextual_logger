@@ -11,12 +11,8 @@ jobs:
         ruby: [2.5, 2.6, 2.7]
         gemfile:
         - Gemfile
-        - gemfiles/rails_4.gemfile
         - gemfiles/rails_5.gemfile
         - gemfiles/rails_6.gemfile
-        include:
-        - ruby: 2.4
-          gemfile: gemfiles/rails_4.gemfile
     env:
       BUNDLE_GEMFILE: ${{ matrix.gemfile }}
     steps:
