@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    contextual_logger (0.11.0)
+    contextual_logger (1.0.0)
       activesupport
       json
 
