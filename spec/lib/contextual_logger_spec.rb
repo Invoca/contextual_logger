@@ -17,7 +17,7 @@ describe ContextualLogger do
   before(:each) { Time.now_override = Time.now }
   after(:each)  { logger.global_context = {} }
 
-  let(:raw_logger) { Logger.new('/dev/null') }
+  let(:raw_logger) { Logger.new('spec/reports/test.log') }
   subject(:logger) do
     raw_logger.tap do |logger|
       logger.extend(ContextualLogger::LoggerMixin)

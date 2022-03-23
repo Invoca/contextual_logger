@@ -4,6 +4,10 @@ Inspired by [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Note: this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0] - Unreleased
+### Added
+- Added official support for Ruby 3+
+
 ## [0.11.0] - 2020-09-15
 ### Changed
 - Updated contextual logger to normalize keys to symbols and warn on string keys
@@ -86,6 +90,7 @@ are already passed to the formatter as arguments so that the formatter can decid
  - Extracted `ContextualLogger.normalize_log_level` into a public class method so we can call it elsewhere where we allow log_level to be
    configured to text values like 'debug'.
 
+[1.0.0]: https://github.com/Invoca/contextual_logger/compare/v0.11.0...v1.0.0
 [0.11.0]: https://github.com/Invoca/contextual_logger/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/Invoca/contextual_logger/compare/v0.9.1...v0.10.0
 [0.9.1]: https://github.com/Invoca/contextual_logger/compare/v0.9.0...v0.9.1
