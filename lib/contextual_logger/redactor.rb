@@ -17,6 +17,14 @@ module ContextualLogger
       end
     end
 
+    def register_regex(regex)
+      if redaction_set.add?(regex)
+        @redaction_regex = Regexp.new(
+          redaction_set.to_a.join('|')
+        )
+      end
+    end
+
     def redact(log_line)
       if redaction_regex
         log_line.gsub(redaction_regex, '<redacted>')

@@ -25,9 +25,16 @@ RSpec.describe ContextualLogger::Redactor do
   end
 
   describe '#redact' do
-    before(:each) { subject.register_secret('hello') }
+    before(:each) do
+      subject.register_regex('(key|password|token|secret)[_a-z]*[\s\"]*(:|=>|=)[\s\"]*\K([0-9a-z_]*)')
+      subject.register_secret('hello')
+    end
 
     it 'redacts the sensitive data from the message' do
+      expect(subject.redact('api_key=ffbba9b905c0a549b48f48894ad7aa9b7bd7c06c world')).to eq('api_key=<redacted> world')
+    end
+
+    it 'redacts registered secrets from the message' do
       expect(subject.redact('hello world')).to eq('<redacted> world')
     end
 
