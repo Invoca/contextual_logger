@@ -10,7 +10,11 @@ module ContextualLogger
     end
 
     def register_secret(sensitive_data)
-      if redaction_set.add?(Regexp.escape(sensitive_data))
+      register_regex(Regexp.escape(sensitive_data))
+    end
+
+    def register_regex(regex)
+      if redaction_set.add?(regex)
         @redaction_regex = Regexp.new(
           redaction_set.to_a.join('|')
         )
