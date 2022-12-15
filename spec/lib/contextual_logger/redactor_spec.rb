@@ -26,7 +26,7 @@ RSpec.describe ContextualLogger::Redactor do
 
   describe '#redact' do
     before(:each) do
-      subject.register_regex('(key|password|token|secret)[_a-z]*[\s\"]*(:|=>|=)[\s\"]*\K([0-9a-z_]*)')
+      subject.register_secret_regex('(key|password|token|secret)[_a-z]*[\s\"]*(:|=>|=)[\s\"]*\K([0-9a-zA-Z_]*)')
       subject.register_secret('hello')
     end
 

@@ -542,6 +542,7 @@ describe ContextualLogger do
 
     before(:each) do
       logger.register_secret(sensitive_data)
+      logger.register_secret_regex('(key|password|token|secret)[_a-z]*[\s\"]*(:|=>|=)[\s\"]*\K([0-9a-zA-Z_]*)')
     end
 
     describe 'with sensitive data in the message' do
@@ -557,6 +558,12 @@ describe ContextualLogger do
       it 'replaces sensitive data with <redacted>' do
         expect_log_line_to_be_written(expected_log_hash.to_json)
         expect(logger.debug("this is a test with #{sensitive_data}", service: 'test_service')).to eq(true)
+      end
+
+      it 'replaces matching patterns in the data with <redacted>' do
+        expected_log_hash[:message] = 'this is a test token=<redacted>'
+        expect_log_line_to_be_written(expected_log_hash.to_json)
+        expect(logger.debug("this is a test token=aAbBcC1_2DdEeFf", service: 'test_service')).to eq(true)
       end
     end
 
