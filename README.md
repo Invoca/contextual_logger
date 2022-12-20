@@ -137,7 +137,7 @@ The above will produce the resulting log line:
 Regex is also supported for redaction:
 ```ruby
 regex = /(key|password|token|secret)[_a-z]*[\s\"]*(:|=>|=)[\s\"]*\K([0-9a-z_]*)/i
-contextual_logger.register_regex(regex)
+contextual_logger.register_secret_regex(regex)
 
 contextual_logger.info("Request set with body { 'username': 'test_user', 'password': 'ffbba9b905c0a549b48f48894ad7aa9b7bd7c06c' } }")
 ```

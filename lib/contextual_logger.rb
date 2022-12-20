@@ -43,7 +43,7 @@ module ContextualLogger
   end
 
   module LoggerMixin
-    delegate :register_secret, to: :redactor
+    delegate :register_secret, :register_secret_regex, to: :redactor
 
     def global_context=(context)
       Context::Handler.new(context).set!
