@@ -1,5 +1,5 @@
 # frozen_string_literal: true
 
 module ContextualLogger
-  VERSION = '1.1.1.pre.bll.0'
+  VERSION = '1.1.1'
 end
