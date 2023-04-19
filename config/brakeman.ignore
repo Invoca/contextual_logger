@@ -1,0 +1,8 @@
+{
+    "ignored_warnings": [
+        {
+          "fingerprint": "81776f151be34b9c42a5fc3bec249507a2acd9b64338e6f544a68559976bc5d5",
+          "note": "ignore Ruby 2.7"
+        }
+    ]
+}
