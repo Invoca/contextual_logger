@@ -2,26 +2,29 @@
 
 module ContextualLogger
   module Context
+    THREAD_CONTEXT_NAMESPACE = :'ContextualLogger::Context.current_context'
+
+    @global_context = {}.freeze
+
+    class << self
+      attr_accessor :global_context
+
+      def current_context
+        Thread.current[THREAD_CONTEXT_NAMESPACE] || global_context
+      end
+
+      def current_context=(context)
+        Thread.current[THREAD_CONTEXT_NAMESPACE] = context.freeze
+      end
+    end
+
     class Handler
-      THREAD_CONTEXT_NAMESPACE = 'ContextualLoggerCurrentLoggingContext'
-
-      attr_reader :previous_context, :context
-
-      def self.current_context
-        Thread.current[THREAD_CONTEXT_NAMESPACE] || {}
-      end
-
-      def initialize(context, previous_context: nil)
-        @previous_context = previous_context || self.class.current_context
-        @context = context
-      end
-
-      def set!
-        Thread.current[THREAD_CONTEXT_NAMESPACE] = context
+      def initialize(previous_context)
+        @previous_context = previous_context
       end
 
       def reset!
-        Thread.current[THREAD_CONTEXT_NAMESPACE] = previous_context
+        ::ContextualLogger::Context.current_context = @previous_context
       end
     end
   end
