@@ -14,8 +14,11 @@ RSpec::Matchers.define :a_json_log_line_like do |expected|
 end
 
 describe ContextualLogger do
-  before(:each) { Time.now_override = Time.now }
-  after(:each)  { logger.global_context = {} }
+  before { Time.now_override = Time.now }
+  after do
+    logger.global_context = {}
+    described_class::Context.current_context = nil
+  end
 
   let(:raw_logger) { Logger.new('spec/reports/test.log') }
   subject(:logger) do
@@ -418,6 +421,8 @@ describe ContextualLogger do
       logger.with_context(hash_context: { apple: 'orange', hello: 'world' }) do
         expect(logger.info('this is a test', array_context: [3], hash_context: { pizza: 'bagel', hello: 'goodbye' })).to eq(true)
       end
+    ensure
+      logger.global_context = {}
     end
   end
 
