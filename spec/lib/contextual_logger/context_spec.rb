@@ -46,6 +46,14 @@ RSpec.describe ContextualLogger::Context do
         expect(instance2.current_context).to eq(context2)
       end
 
+      it 'freezes the context when set' do
+        instance.current_context = {}
+
+        expect do
+          instance.current_context[:extra] = 'value'
+        end.to raise_exception(RuntimeError, /can't modify frozen/)
+      end
+
       it 'returns nil when set to nil' do
         instance.current_context = nil
 
