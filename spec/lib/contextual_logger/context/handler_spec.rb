@@ -16,8 +16,7 @@ RSpec.describe ContextualLogger::Context do
 
   describe 'mixin methods' do
     describe 'current_context/current_context=' do
-      it 'can be set with current_context=, per Fiber/Thread' do
-        previous_context = instance.current_context({})
+      it 'can be set with current_context=, separately per Fiber/Thread' do
         instance.current_context = context
 
         Thread.new do
@@ -31,21 +30,21 @@ RSpec.describe ContextualLogger::Context do
         end.resume
 
         expect(instance.current_context({})).to eq(context)
+      end
 
-      ensure
-        instance.current_context = previous_context
+      it 'the current_context= values are separately per containing instance' do
+        instance.current_context = context
+        instance2 = ContextualLoggerContextContainerForSpec.new
+        instance2.current_context = context2
+
+        expect(instance.current_context({})).to eq(context)
+        expect(instance2.current_context({})).to eq(context2)
       end
 
       it 'defaults to global_context when set to nil' do
-        previous_context = instance.current_context(nil)
-
         instance.current_context = nil
 
-        expect(instance.current_context(context)).to_not eq(previous_context)
         expect(instance.current_context(context)).to eq(context)
-
-      ensure
-        instance.current_context = previous_context
       end
     end
   end
@@ -56,13 +55,10 @@ RSpec.describe ContextualLogger::Context do
     it { is_expected.to respond_to(:reset!) }
 
     it 'resets the thread context on reset!' do
-      initial_context = instance.current_context(nil)
       instance.current_context = context2
       handler.reset!
 
       expect(instance.current_context(nil)).to eq(context)
-    ensure
-      instance.current_context = initial_context
     end
   end
 end

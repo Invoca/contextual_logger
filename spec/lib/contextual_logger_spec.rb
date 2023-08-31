@@ -15,10 +15,6 @@ end
 
 describe ContextualLogger do
   before { Time.now_override = Time.now }
-  after do
-    logger.global_context = {}
-    logger.current_context = nil
-  end
 
   let(:raw_logger) { Logger.new('spec/reports/test.log') }
   subject(:logger) do
@@ -421,8 +417,6 @@ describe ContextualLogger do
       logger.with_context(hash_context: { apple: 'orange', hello: 'world' }) do
         expect(logger.info('this is a test', array_context: [3], hash_context: { pizza: 'bagel', hello: 'goodbye' })).to eq(true)
       end
-    ensure
-      logger.global_context = {}
     end
   end
 
