@@ -56,6 +56,10 @@ module ContextualLogger
       @global_context = context.freeze
     end
 
+    def current_context_for_thread
+      current_context || global_context
+    end
+
     def with_context(context)
       previous_context = current_context_for_thread
       self.current_context = previous_context.deep_merge(context)
@@ -69,10 +73,6 @@ module ContextualLogger
         # If no block given, return context handler to the caller so they can call reset! themselves.
         ContextHandler.new(self, previous_context)
       end
-    end
-
-    def current_context_for_thread
-      current_context(global_context)
     end
 
     # In the methods generated below, we assume that presence of context means new code that is

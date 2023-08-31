@@ -21,6 +21,6 @@ RSpec.describe ContextualLogger::ContextHandler do
     instance.current_context = context2
     handler.reset!
 
-    expect(instance.current_context(nil)).to eq(context)
+    expect(instance.current_context).to eq(context)
   end
 end
