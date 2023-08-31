@@ -325,7 +325,7 @@ describe ContextualLogger do
     end
 
     it 'returns a context handler' do
-      expect(logger.with_context(service: 'test_service')).to be_a(ContextualLogger::Context::Handler)
+      expect(logger.with_context(service: 'test_service')).to be_a(ContextualLogger::ContextHandler)
     end
 
     it 'prints out the wrapper context with logging' do

@@ -4,7 +4,8 @@ require 'active_support'
 require 'active_support/core_ext/module/delegation'
 require 'json'
 require_relative './contextual_logger/redactor'
-require_relative './contextual_logger/context/handler'
+require_relative './contextual_logger/context'
+require_relative './contextual_logger/context_handler'
 
 module ContextualLogger
   LOG_LEVEL_NAMES_TO_SEVERITY =
@@ -65,7 +66,7 @@ module ContextualLogger
         end
       else
         # If no block given, return context handler to the caller so they can call reset! themselves.
-        Context::Handler.new(self, previous_context)
+        ContextHandler.new(self, previous_context)
       end
     end
 

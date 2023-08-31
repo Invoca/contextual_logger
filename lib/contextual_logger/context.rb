@@ -14,16 +14,5 @@ module ContextualLogger
     def current_context=(context)
       Thread.current[thread_context_for_logger_instance] = context.freeze
     end
-
-    class Handler
-      def initialize(instance, previous_context)
-        @instance = instance
-        @previous_context = previous_context
-      end
-
-      def reset!
-        @instance.current_context = @previous_context
-      end
-    end
   end
 end
