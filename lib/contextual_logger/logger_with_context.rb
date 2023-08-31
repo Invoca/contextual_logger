@@ -19,6 +19,10 @@ module ContextualLogger
       @merged_context_cache = {}  # so we don't have to merge every time
     end
 
+    def global_context
+      @logger.global_context
+    end
+
     def level
       @override_level || @logger.level
     end

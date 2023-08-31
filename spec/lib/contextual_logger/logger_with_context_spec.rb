@@ -29,6 +29,13 @@ describe ContextualLogger::LoggerWithContext do
       expect(log_stream.string).to match(/\{"message":"fatal message","severity":"FATAL","timestamp":".*","log_source":"frontend"\}/)
     end
 
+    it "delegates global_context to base_logger" do
+      base_logger.global_context = { data_silo: "eu" }
+
+      subject.fatal("fatal message", log_source: "frontend")
+      expect(log_stream.string).to match(/\{"message":"fatal message","severity":"FATAL","timestamp":.*,"log_source":"frontend","data_silo":"eu"\}/)
+    end
+
     context "context caching" do
       it "caches contexts to avoid merging over and over (but caps the cache size)" do
         subject.fatal("fatal message", log_source: "frontend")
