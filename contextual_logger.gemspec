@@ -19,6 +19,6 @@ Gem::Specification.new do |spec|
     "allowed_push_host" => "https://rubygems.org"
   }
 
-  spec.add_runtime_dependency 'json'
-  spec.add_runtime_dependency 'activesupport'
+  spec.add_dependency 'json'
+  spec.add_dependency 'activesupport'
 end
