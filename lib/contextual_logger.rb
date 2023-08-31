@@ -43,6 +43,7 @@ module ContextualLogger
   end
 
   module LoggerMixin
+    include Context
     delegate :register_secret, :register_secret_regex, to: :redactor
 
     def global_context
@@ -55,21 +56,21 @@ module ContextualLogger
 
     def with_context(context)
       previous_context = current_context_for_thread
-      Context.current_context = previous_context.deep_merge(context)
+      self.current_context = previous_context.deep_merge(context)
       if block_given?
         begin
           yield
         ensure
-          Context.current_context = previous_context
+          self.current_context = previous_context
         end
       else
         # If no block given, return context handler to the caller so they can call reset! themselves.
-        Context::Handler.new(previous_context)
+        Context::Handler.new(self, previous_context)
       end
     end
 
     def current_context_for_thread
-      Context.current_context(global_context)
+      current_context(global_context)
     end
 
     # In the methods generated below, we assume that presence of context means new code that is

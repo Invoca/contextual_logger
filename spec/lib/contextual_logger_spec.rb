@@ -17,7 +17,7 @@ describe ContextualLogger do
   before { Time.now_override = Time.now }
   after do
     logger.global_context = {}
-    described_class::Context.current_context = nil
+    logger.current_context = nil
   end
 
   let(:raw_logger) { Logger.new('spec/reports/test.log') }
