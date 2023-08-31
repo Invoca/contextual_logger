@@ -4,12 +4,8 @@ module ContextualLogger
   module Context
     THREAD_CONTEXT_NAMESPACE = :'ContextualLogger::Context.current_context'
 
-    @global_context = {}.freeze
-
     class << self
-      attr_accessor :global_context
-
-      def current_context
+      def current_context(global_context)
         Thread.current[THREAD_CONTEXT_NAMESPACE] || global_context
       end
 
