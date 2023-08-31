@@ -19,20 +19,25 @@ RSpec.describe ContextualLogger::Context do
       it 'can be set with current_context=, separately per Fiber/Thread' do
         instance.current_context = context
 
-        Thread.new do
-          instance.current_context = context2
-          expect(instance.current_context({})).to eq(context2)
-        end.value
+        thread =
+          Thread.new do
+            instance.current_context = context2
+            expect(instance.current_context({})).to eq(context2)
+          end
 
-        Fiber.new do
-          instance.current_context = context3
-          expect(instance.current_context({})).to eq(context3)
-        end.resume
+        fiber =
+          Fiber.new do
+            instance.current_context = context3
+            expect(instance.current_context({})).to eq(context3)
+          end
+
+        fiber.resume
+        thread.join
 
         expect(instance.current_context({})).to eq(context)
       end
 
-      it 'the current_context= values are separately per containing instance' do
+      it 'the current_context= values are separate per containing instance' do
         instance.current_context = context
         instance2 = ContextualLoggerContextSpecContainer.new
         instance2.current_context = context2
