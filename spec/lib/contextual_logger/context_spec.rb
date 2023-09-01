@@ -15,49 +15,51 @@ RSpec.describe ContextualLogger::Context do
   let(:instance) { ContextualLoggerContextSpecContainer.new }
 
   describe 'mixin methods' do
-    describe 'current_context/current_context=' do
-      it 'can be set with current_context=, separately per Fiber/Thread' do
-        instance.current_context = context
+    describe 'current_context_override/current_context_override=' do
+      it 'can be set with current_context_override=, separately per Fiber/Thread' do
+        instance.current_context_override = context
 
         thread =
           Thread.new do
-            instance.current_context = context2
-            expect(instance.current_context).to eq(context2)
+            instance.current_context_override = context2
+            instance.current_context_override
           end
 
         fiber =
           Fiber.new do
-            instance.current_context = context3
-            expect(instance.current_context).to eq(context3)
+            instance.current_context_override = context3
+            instance.current_context_override
           end
 
-        fiber.resume
-        thread.join
+        fiber_override = fiber.resume
+        thread_override = thread.value
 
-        expect(instance.current_context).to eq(context)
+        expect(instance.current_context_override).to eq(context)
+        expect(thread_override).to eq(context2)
+        expect(fiber_override).to eq(context3)
       end
 
-      it 'the current_context= values are separate per containing instance' do
-        instance.current_context = context
+      it 'the current_context_override= values are separate per containing instance' do
+        instance.current_context_override = context
         instance2 = ContextualLoggerContextSpecContainer.new
-        instance2.current_context = context2
+        instance2.current_context_override = context2
 
-        expect(instance.current_context).to eq(context)
-        expect(instance2.current_context).to eq(context2)
+        expect(instance.current_context_override).to eq(context)
+        expect(instance2.current_context_override).to eq(context2)
       end
 
-      it 'freezes the context when set' do
-        instance.current_context = {}
+      it 'freezes the context_override when set' do
+        instance.current_context_override = {}
 
         expect do
-          instance.current_context[:extra] = 'value'
+          instance.current_context_override[:extra] = 'value'
         end.to raise_exception(RuntimeError, /can't modify frozen/)
       end
 
       it 'returns nil when set to nil' do
-        instance.current_context = nil
+        instance.current_context_override = nil
 
-        expect(instance.current_context).to be_nil
+        expect(instance.current_context_override).to be_nil
       end
     end
   end

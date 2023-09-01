@@ -18,9 +18,9 @@ RSpec.describe ContextualLogger::ContextHandler do
   it { is_expected.to respond_to(:reset!) }
 
   it 'resets the thread context on reset!' do
-    instance.current_context = context2
+    instance.current_context_override = context2
     handler.reset!
 
-    expect(instance.current_context).to eq(context)
+    expect(instance.current_context_override).to eq(context)
   end
 end

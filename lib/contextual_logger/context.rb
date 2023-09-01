@@ -7,12 +7,12 @@ module ContextualLogger
       @thread_context_for_logger_instance ||= "ContextualLogger::Context.context_for_#{object_id}".to_sym
     end
 
-    def current_context
+    def current_context_override
       Thread.current[thread_context_for_logger_instance]
     end
 
-    def current_context=(context)
-      Thread.current[thread_context_for_logger_instance] = context.freeze
+    def current_context_override=(context_override)
+      Thread.current[thread_context_for_logger_instance] = context_override.freeze
     end
   end
 end

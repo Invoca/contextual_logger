@@ -56,22 +56,22 @@ module ContextualLogger
       @global_context = context.freeze
     end
 
-    def current_context_for_thread
-      current_context || global_context
+    def current_context
+      current_context_override || global_context
     end
 
     def with_context(context)
-      previous_context = current_context_for_thread
-      self.current_context = previous_context.deep_merge(context)
+      previous_context_override = current_context_override
+      self.current_context_override = current_context.deep_merge(context)
       if block_given?
         begin
           yield
         ensure
-          self.current_context = previous_context
+          self.current_context_override = previous_context_override
         end
       else
         # If no block given, return context handler to the caller so they can call reset! themselves.
-        ContextHandler.new(self, previous_context)
+        ContextHandler.new(self, previous_context_override)
       end
     end
 
@@ -124,7 +124,7 @@ module ContextualLogger
           message = arg1
           progname = arg2 || @progname
         end
-        write_entry_to_log(severity, Time.now, progname, message, context: current_context_for_thread.deep_merge(context))
+        write_entry_to_log(severity, Time.now, progname, message, context: current_context.deep_merge(context))
       end
 
       true
