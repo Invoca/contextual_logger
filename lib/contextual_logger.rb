@@ -60,6 +60,9 @@ module ContextualLogger
       current_context_override || global_context
     end
 
+    # TODO: Deprecate current_context_for_thread in v2.0.
+    alias current_context_for_thread current_context
+
     def with_context(context)
       previous_context_override = current_context_override
       self.current_context_override = current_context.deep_merge(context)

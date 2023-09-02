@@ -24,6 +24,8 @@ describe ContextualLogger do
   end
 
   it { is_expected.to respond_to(:with_context) }
+  it { is_expected.to respond_to(:current_context) }
+  it { is_expected.to respond_to(:current_context_for_thread) } # for backward-compatibility
 
   context 'with logger writing to log_stream' do
     let(:log_stream) { StringIO.new }
@@ -239,27 +241,27 @@ describe ContextualLogger do
       }
     end
 
-    it 'prints out context passed into debug' do
+    it 'includes context passed into debug' do
       expect_log_line_to_be_written(expected_log_hash.merge(severity: 'DEBUG').to_json)
       expect(logger.debug('this is a test', service: 'test_service')).to eq(true)
     end
 
-    it 'prints out context passed into info' do
+    it 'includes context passed into info' do
       expect_log_line_to_be_written(expected_log_hash.merge(severity: 'INFO').to_json)
       expect(logger.info('this is a test', service: 'test_service')).to eq(true)
     end
 
-    it 'prints out context passed into warn' do
+    it 'includes context passed into warn' do
       expect_log_line_to_be_written(expected_log_hash.merge(severity: 'WARN').to_json)
       expect(logger.warn('this is a test', service: 'test_service')).to eq(true)
     end
 
-    it 'prints out context passed into error' do
+    it 'includes context passed into error' do
       expect_log_line_to_be_written(expected_log_hash.merge(severity: 'ERROR').to_json)
       expect(logger.error('this is a test', service: 'test_service')).to eq(true)
     end
 
-    it 'prints out context passed into fatal' do
+    it 'includes context passed into fatal' do
       expect_log_line_to_be_written(expected_log_hash.merge(severity: 'FATAL').to_json)
       expect(logger.fatal('this is a test', service: 'test_service')).to eq(true)
     end
@@ -275,11 +277,19 @@ describe ContextualLogger do
       }
     end
 
-    it 'prints out the wrapper context when logging' do
+    it 'includes the wrapper context when logging' do
       expect_log_line_to_be_written(expected_log_hash.to_json)
 
       logger.with_context(service: 'test_service') do
         expect(logger.info('this is a test')).to eq(true)
+      end
+    end
+
+    it 'includes the wrapper context in the current_context and current_context_for_thread' do
+      logger.global_context = { global: 'context' }
+      logger.with_context(service: 'test_service') do
+        expect(logger.current_context).to eq(global: 'context', service: 'test_service')
+        expect(logger.current_context_for_thread).to eq(global: 'context', service: 'test_service')
       end
     end
 
@@ -328,7 +338,7 @@ describe ContextualLogger do
       expect(logger.with_context(service: 'test_service')).to be_a(ContextualLogger::ContextHandler)
     end
 
-    it 'prints out the wrapper context with logging' do
+    it 'includes the wrapper context with logging' do
       expect_log_line_to_be_written(expected_log_hash.to_json)
 
       handler = logger.with_context(service: 'test_service')
@@ -376,7 +386,7 @@ describe ContextualLogger do
       logger.global_context = { service: 'test_service' }
     end
 
-    it 'prints out global context with log line' do
+    it 'adds global context to logs' do
       expect_log_line_to_be_written(expected_log_hash.to_json)
       expect(logger.info('this is a test')).to eq(true)
     end
