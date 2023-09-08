@@ -167,7 +167,10 @@ module ContextualLogger
       message_hash[:progname] = normalized_progname if normalized_progname
 
       # merge! is faster and OK here since message_hash is still local only to this method
-      message_hash.merge!(context).to_json
+      if context.any?
+        message_hash.merge!(context)
+      end
+      message_hash.to_json
     end
   end
 end

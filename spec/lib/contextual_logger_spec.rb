@@ -188,18 +188,32 @@ describe ContextualLogger do
         severity: 'INFO',
         message: message,
         timestamp: Time.now,
+        name: {
+          first: 'Jane',
+          last: 'Doe'
+        },
         service: 'test_service'
       }
     end
 
+    before do
+      logger.global_context =
+        {
+          name: {
+            first: 'John',
+            last: 'Doe'
+          }
+        }
+    end
+
     it 'handles message block (inline context) with nil progname' do
       expect_log_line_to_be_written(expected_log_hash.to_json)
-      expect(logger.info(nil, service: 'test_service') { 'this is a test' }).to eq(true)
+      expect(logger.info(nil, service: 'test_service', name: { first: 'Jane' }) { 'this is a test' }).to eq(true)
     end
 
     it 'handles message block (inline context) with no progname' do
       expect_log_line_to_be_written(expected_log_hash.to_json)
-      expect(logger.info(service: 'test_service') { 'this is a test' }).to eq(true)
+      expect(logger.info(service: 'test_service', name: { first: 'Jane' }) { 'this is a test' }).to eq(true)
     end
 
     context 'with progname and message' do
@@ -212,10 +226,10 @@ describe ContextualLogger do
           '"message"'
         end
         expect_log_line_to_be_written('"message"')
-        expect(logger.info('request', service: 'test_service') { 'this is a test' }).to eq(true)
+        expect(logger.info('request', service: 'test_service', name: { first: 'Jane' }) { 'this is a test' }).to eq(true)
 
         expect(formatter_args[2]).to eq('request')
-        expect(formatter_args[3]).to eq(message: "this is a test", service: "test_service")
+        expect(formatter_args[3]).to eq(message: "this is a test", name: { first: "Jane", last: "Doe" }, service: "test_service")
       end
     end
 
@@ -225,7 +239,7 @@ describe ContextualLogger do
       [:debug, :info, :warn, :error, :fatal].each do |level|
         it "does not call message block (#{level})" do
           block_called = false
-          logger.send(level, nil, service: 'test_service') { block_called = true }
+          logger.send(level, nil, service: 'test_service', name: { first: 'Jane' }) { block_called = true }
           expect(block_called).to be_falsey
         end
       end
