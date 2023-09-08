@@ -64,17 +64,18 @@ module ContextualLogger
     alias current_context_for_thread current_context
 
     def with_context(context)
-      previous_context_override = current_context_override
+      context_handler = ContextHandler.new(self, current_context_override)
       self.current_context_override = current_context.deep_merge(context)
+
       if block_given?
         begin
           yield
         ensure
-          self.current_context_override = previous_context_override
+          context_handler.reset!
         end
       else
         # If no block given, return context handler to the caller so they can call reset! themselves.
-        ContextHandler.new(self, previous_context_override)
+        context_handler
       end
     end
 
