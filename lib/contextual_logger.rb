@@ -65,7 +65,7 @@ module ContextualLogger
 
     def with_context(context)
       context_handler = ContextHandler.new(self, current_context_override)
-      self.current_context_override = current_context.deep_merge(context)
+      self.current_context_override = deep_merge_with_current_context(context)
 
       if block_given?
         begin

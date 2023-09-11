@@ -493,6 +493,23 @@ describe ContextualLogger do
       end
       logger.add(Logger::Severity::INFO, "info message", context: { a: 1 })
     end
+
+    it "stops caching deep_merge results at 100" do
+      100.times do |n|
+        logger.add(Logger::Severity::INFO, "info message", context: { b: n })
+      end
+
+      deep_merged_context = nil
+      expect(logger).to receive(:write_entry_to_log).with(Logger::Severity::INFO, anything, nil, "info message", context: anything) do |*args, context:|
+        deep_merged_context = context
+      end
+      logger.add(Logger::Severity::INFO, "info message", context: { a: 1 })
+
+      expect(logger).to receive(:write_entry_to_log).with(Logger::Severity::INFO, anything, nil, "info message", context: anything) do |*args, context:|
+        expect(context).to_not be(deep_merged_context)
+      end
+      logger.add(Logger::Severity::INFO, "info message", context: { a: 1 })
+    end
   end
 
   LOG_LEVEL_STRINGS_TO_CONSTANTS =
