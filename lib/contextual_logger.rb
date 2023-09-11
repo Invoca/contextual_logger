@@ -113,7 +113,7 @@ module ContextualLogger
 
     # Note that this interface needs to stay compatible with the underlying ::Logger#add interface,
     # which is: def add(severity, message = nil, progname = nil)
-    def add(arg_severity, arg1 = nil, arg2 = nil, **context)   # Ruby will prefer to match hashes up to last ** argument
+    def add(arg_severity, arg1 = nil, arg2 = nil, **context)   # Ruby will prefer to match hashes to last argument because of **
       severity = arg_severity || UNKNOWN
       if log_level_enabled?(severity)
         if arg1.nil?
@@ -128,7 +128,7 @@ module ContextualLogger
           message = arg1
           progname = arg2 || @progname
         end
-        write_entry_to_log(severity, Time.now, progname, message, context: current_context.deep_merge(context))
+        write_entry_to_log(severity, Time.now, progname, message, context: deep_merge_with_current_context(context))
       end
 
       true
@@ -152,7 +152,7 @@ module ContextualLogger
       normalized_message = ContextualLogger.normalize_message(message)
       normalized_progname = ContextualLogger.normalize_message(progname) unless progname.nil?
       if @formatter
-        @formatter.call(severity, timestamp, normalized_progname, { message: normalized_message }.merge!(context))
+        @formatter.call(severity, timestamp, normalized_progname, { message: normalized_message, **context })
       else
         "#{basic_json_log_entry(severity, timestamp, normalized_progname, normalized_message, context: context)}\n"
       end
@@ -162,15 +162,25 @@ module ContextualLogger
       message_hash = {
         message: normalized_progname ? "#{normalized_progname}: #{normalized_message}" : normalized_message,
         severity:  severity,
-        timestamp: timestamp
+        timestamp: timestamp,
+        **context
       }
       message_hash[:progname] = normalized_progname if normalized_progname
 
-      # merge! is faster and OK here since message_hash is still local only to this method
-      if context.any?
-        message_hash.merge!(context)
-      end
       message_hash.to_json
+    end
+
+    def deep_merge_with_current_context(context)
+      if context.any?
+        @deep_merged_context_cache ||= {}  # so we don't have to merge every time
+        if @deep_merged_context_cache.size >= 100 # keep this cache memory use finite
+          @deep_merged_context_cache[context] || current_context.deep_merge(context)
+        else
+          @deep_merged_context_cache[context] ||= current_context.deep_merge(context)
+        end
+      else
+        current_context
+      end
     end
   end
 end
