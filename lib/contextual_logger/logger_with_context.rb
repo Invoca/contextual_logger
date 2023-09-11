@@ -16,7 +16,6 @@ module ContextualLogger
       @logger = logger
       self.level = level
       @context = normalize_context(context)
-      @merged_context_cache = {}  # so we don't have to merge every time
     end
 
     def global_context
@@ -33,10 +32,10 @@ module ContextualLogger
 
     def write_entry_to_log(severity, timestamp, progname, message, context:)
       merged_context =
-        if @merged_context_cache.size >= 1000 # keep this cache memory use finite
-          @merged_context_cache[context] || @context.deep_merge(context)
+        if context.any?
+          @context.deep_merge(context)
         else
-          @merged_context_cache[context] ||= @context.deep_merge(context)
+          @context
         end
 
       @logger.write_entry_to_log(severity, timestamp, progname, message, context: merged_context)

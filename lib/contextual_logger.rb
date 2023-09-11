@@ -6,6 +6,7 @@ require 'json'
 require_relative './contextual_logger/redactor'
 require_relative './contextual_logger/context'
 require_relative './contextual_logger/context_handler'
+require_relative './contextual_logger/global_context_lock_message'
 
 module ContextualLogger
   LOG_LEVEL_NAMES_TO_SEVERITY =
@@ -49,10 +50,13 @@ module ContextualLogger
     delegate :register_secret, :register_secret_regex, to: :redactor
 
     def global_context
-      @global_context ||= {}.freeze
+      @global_context ||= Context::EMPTY_CONTEXT
     end
 
     def global_context=(context)
+      if (global_context_lock_message = ::ContextualLogger.global_context_lock_message)
+        raise ::ContextualLogger::GlobalContextIsLocked, global_context_lock_message
+      end
       @global_context = context.freeze
     end
 
@@ -63,9 +67,9 @@ module ContextualLogger
     # TODO: Deprecate current_context_for_thread in v2.0.
     alias current_context_for_thread current_context
 
-    def with_context(context)
-      context_handler = ContextHandler.new(self, current_context_override)
-      self.current_context_override = deep_merge_with_current_context(context)
+    def with_context(stacked_context)
+      context_handler = ContextHandler.new(self, self.current_context_override)
+      self.current_context_override = deep_merge_with_current_context(stacked_context)
 
       if block_given?
         begin
@@ -170,14 +174,9 @@ module ContextualLogger
       message_hash.to_json
     end
 
-    def deep_merge_with_current_context(context)
-      if context.any?
-        @deep_merged_context_cache ||= {}  # so we don't have to merge every time
-        if @deep_merged_context_cache.size >= 100 # keep this cache memory use finite
-          @deep_merged_context_cache[context] || current_context.deep_merge(context)
-        else
-          @deep_merged_context_cache[context] ||= current_context.deep_merge(context)
-        end
+    def deep_merge_with_current_context(stacked_context)
+      if stacked_context.any?
+        current_context.deep_merge(stacked_context)
       else
         current_context
       end

@@ -7,6 +7,8 @@ require 'contextual_logger/logger_with_context'
 require 'json'
 
 describe ContextualLogger::LoggerWithContext do
+  after { ::ContextualLogger.global_context_lock_message = nil }
+
   context "when created with a base logger" do
     let(:log_stream) { StringIO.new }
     let(:base_logger) { Logger.new(log_stream, level: Logger::Severity::FATAL).extend(ContextualLogger::LoggerMixin) }
@@ -34,21 +36,6 @@ describe ContextualLogger::LoggerWithContext do
 
       subject.fatal("fatal message", log_source: "frontend")
       expect(log_stream.string).to match(/\{"message":"fatal message","severity":"FATAL","timestamp":.*,"log_source":"frontend","data_silo":"eu"\}/)
-    end
-
-    context "context caching" do
-      it "caches contexts to avoid merging over and over (but caps the cache size)" do
-        subject.fatal("fatal message", log_source: "frontend")
-        expect(subject.instance_variable_get(:@merged_context_cache).keys).to eq([{ log_source: "frontend" }])
-        subject.fatal("fatal message", log_source: "redis_client")
-        expect(subject.instance_variable_get(:@merged_context_cache).keys).to eq([{ log_source: "frontend" }, { log_source: "redis_client" }])
-        998.times do |i|
-          subject.fatal("fatal message", log_source: "gem #{i}")
-        end
-        expect(subject.instance_variable_get(:@merged_context_cache).size).to eq(1000)
-        subject.fatal("fatal message", log_source: "gem 1000")
-        expect(subject.instance_variable_get(:@merged_context_cache).size).to eq(1000)
-      end
     end
 
     context "log level changes" do
