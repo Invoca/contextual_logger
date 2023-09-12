@@ -10,11 +10,11 @@ module ContextualLogger
     end
 
     def current_context_override
-      ContextualLogger.global_context_lock_message ||= "ContextualLogger::Context.current_context_override set for #{self.class.name} #{object_id}"
       Thread.current[thread_context_key_for_logger_instance]
     end
 
     def current_context_override=(context_override)
+      ContextualLogger.global_context_lock_message ||= "ContextualLogger::Context.current_context_override set for #{self.class.name} #{object_id}: #{context_override.inspect}"
       Thread.current[thread_context_key_for_logger_instance] = context_override.freeze
     end
   end
