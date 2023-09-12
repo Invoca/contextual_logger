@@ -479,12 +479,12 @@ describe ContextualLogger do
 
     it "skips deep_merge when context is empty" do
       deep_merged_context = nil
-      expect(logger).to receive(:write_entry_to_log).with(Logger::Severity::INFO, anything, nil, "info message", context: anything) do |*args, context:|
+      expect(logger).to receive(:write_entry_to_log).with(Logger::Severity::INFO, anything, nil, "info message", context: anything) do |*_args, context:|
         deep_merged_context = context
       end
       logger.add(Logger::Severity::INFO, "info message")
 
-      expect(logger).to receive(:write_entry_to_log).with(Logger::Severity::INFO, anything, nil, "info message", context: anything) do |*args, context:|
+      expect(logger).to receive(:write_entry_to_log).with(Logger::Severity::INFO, anything, nil, "info message", context: anything) do |*_args, context:|
         expect(context).to be(deep_merged_context)
       end
       logger.add(Logger::Severity::INFO, "info message")
