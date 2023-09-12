@@ -8,6 +8,7 @@ Note: this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0
 ### Changed
 - Changed global_context to be stored inside the logger.
 - Changed current_context to be stored in a Thread/Fiber-local variable that is unique per instance of the logger.
+- Changed `LoggerWithContext` to honor `with_context` on itself and the base logger.
 
 ## [1.1.1] - 2022-11-29
 ### Added
