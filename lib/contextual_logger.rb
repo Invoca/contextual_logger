@@ -72,7 +72,7 @@ module ContextualLogger
     alias current_context_for_thread current_context
 
     def with_context(stacked_context)
-      context_handler = ContextHandler.new(self, self.current_context_override)
+      context_handler = ContextHandler.new(self, current_context_override)
       self.current_context_override = deep_merge_with_current_context(stacked_context)
 
       if block_given?
