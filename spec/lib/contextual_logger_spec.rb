@@ -417,6 +417,14 @@ describe ContextualLogger do
         expect(logger.info('this is a test')).to eq(true)
       end
     end
+
+    it "raises if you try to reassign the global_context once it's been used in a context_override" do
+      expect do
+        logger.with_context(trace_id: 'ABCD') do
+          logger.global_context = { uuid: '1234' }
+        end
+      end.to raise_exception(ContextualLogger::GlobalContextIsLocked, /Context\.current_context_override set for Logger/)
+    end
   end
 
   describe 'with varying levels of context' do
