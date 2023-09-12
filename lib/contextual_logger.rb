@@ -44,6 +44,10 @@ module ContextualLogger
     end
   end
 
+  # Context Precedence when this is mixed into a logger:
+  # 1. inline **context passed to the logger method
+  # 2. `with_context` overrides on the logger object
+  # 3. `global_context` set on the logger passed to this constructor
   module LoggerMixin
     include Context
 
