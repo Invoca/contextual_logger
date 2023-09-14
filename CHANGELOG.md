@@ -4,6 +4,12 @@ Inspired by [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Note: this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - Unreleased
+### Changed
+- Changed global_context to be stored inside the logger.
+- Changed current_context to be stored in a Thread/Fiber-local variable that is unique per instance of the logger.
+- Changed `LoggerWithContext` to honor `with_context` on itself and the base logger.
+
 ## [1.1.1] - 2022-11-29
 ### Added
 - Bug fix for registering regex
@@ -99,15 +105,3 @@ are already passed to the formatter as arguments so that the formatter can decid
 ### Added
  - Extracted `ContextualLogger.normalize_log_level` into a public class method so we can call it elsewhere where we allow log_level to be
    configured to text values like 'debug'.
-
-[1.0.0]: https://github.com/Invoca/contextual_logger/compare/v0.11.0...v1.0.0
-[0.11.0]: https://github.com/Invoca/contextual_logger/compare/v0.10.0...v0.11.0
-[0.10.0]: https://github.com/Invoca/contextual_logger/compare/v0.9.1...v0.10.0
-[0.9.1]: https://github.com/Invoca/contextual_logger/compare/v0.9.0...v0.9.1
-[0.9.0]: https://github.com/Invoca/contextual_logger/compare/v0.8.0...v0.9.0
-[0.8.0]: https://github.com/Invoca/contextual_logger/compare/v0.7.0...v0.8.0
-[0.7.0]: https://github.com/Invoca/contextual_logger/compare/v0.6.1...v0.7.0
-[0.6.1]: https://github.com/Invoca/contextual_logger/compare/v0.6.0...v0.6.1
-[0.6.0]: https://github.com/Invoca/contextual_logger/compare/v0.5.1...v0.6.0
-[0.5.1]: https://github.com/Invoca/contextual_logger/compare/v0.5.0...v0.5.1
-[0.5.0]: https://github.com/Invoca/contextual_logger/compare/v0.4.0...v0.5.0

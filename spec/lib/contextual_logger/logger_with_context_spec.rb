@@ -7,6 +7,8 @@ require 'contextual_logger/logger_with_context'
 require 'json'
 
 describe ContextualLogger::LoggerWithContext do
+  after { ::ContextualLogger.global_context_lock_message = nil }
+
   context "when created with a base logger" do
     let(:log_stream) { StringIO.new }
     let(:base_logger) { Logger.new(log_stream, level: Logger::Severity::FATAL).extend(ContextualLogger::LoggerMixin) }
@@ -29,18 +31,43 @@ describe ContextualLogger::LoggerWithContext do
       expect(log_stream.string).to match(/\{"message":"fatal message","severity":"FATAL","timestamp":".*","log_source":"frontend"\}/)
     end
 
-    context "context caching" do
-      it "caches contexts to avoid merging over and over (but caps the cache size)" do
+    it "delegates global_context to base_logger's current_context" do
+      base_logger.global_context = { data_silo: "eu" }
+
+      base_logger.with_context(trace_id: "ABCD") do
         subject.fatal("fatal message", log_source: "frontend")
-        expect(subject.instance_variable_get(:@merged_context_cache).keys).to eq([{ log_source: "frontend" }])
-        subject.fatal("fatal message", log_source: "redis_client")
-        expect(subject.instance_variable_get(:@merged_context_cache).keys).to eq([{ log_source: "frontend" }, { log_source: "redis_client" }])
-        998.times do |i|
-          subject.fatal("fatal message", log_source: "gem #{i}")
+        expect(log_stream.string).to match(/\{"message":"fatal message","severity":"FATAL","timestamp":.*,"data_silo":"eu","trace_id":"ABCD","log_source":"frontend"\}/)
+      end
+    end
+
+    context 'with context set on the subject' do
+      # level 3
+      let(:context) { { log_source: "redis_client", context_4_3: "=logger_with_context" } }
+
+      it "implements the full context from 1 to 5 (see class definition)" do
+        # level 5
+        base_logger.global_context = { data_silo: "eu", context_5_4: 'base_logger' }
+        # level 4
+        base_logger.with_context(trace_id: "ABCD", context_5_4: '=base:with_context', context_4_3: 'base:with_context') do
+          # level 2
+          subject.with_context(context_3_2: 'logger_with_context:with_context', context_2_1: 'logger_with_context:with_context') do
+            # level 1
+            subject.fatal("fatal message", from_fatal: "true", context_2_1: '=fatal')
+            log_stream_json = JSON.parse(log_stream.string)
+            expect(log_stream_json.symbolize_keys.except(:timestamp)).to match(
+              data_silo: "eu",
+              from_fatal: "true",
+              log_source: "redis_client",
+              message: "fatal message",
+              severity: "FATAL",
+              trace_id: "ABCD",
+              context_2_1: "=fatal",
+              context_3_2: "logger_with_context:with_context",
+              context_4_3: "=logger_with_context",
+              context_5_4: "=base:with_context"
+            )
+          end
         end
-        expect(subject.instance_variable_get(:@merged_context_cache).size).to eq(1000)
-        subject.fatal("fatal message", log_source: "gem 1000")
-        expect(subject.instance_variable_get(:@merged_context_cache).size).to eq(1000)
       end
     end
 

@@ -4,7 +4,9 @@ require 'active_support'
 require 'active_support/core_ext/module/delegation'
 require 'json'
 require_relative './contextual_logger/redactor'
-require_relative './contextual_logger/context/handler'
+require_relative './contextual_logger/context'
+require_relative './contextual_logger/context_handler'
+require_relative './contextual_logger/global_context_lock_message'
 
 module ContextualLogger
   LOG_LEVEL_NAMES_TO_SEVERITY =
@@ -42,16 +44,37 @@ module ContextualLogger
     end
   end
 
+  # Context Precedence when this is mixed into a logger:
+  # 1. inline **context passed to the logger method
+  # 2. `with_context` overrides on the logger object
+  # 3. `global_context` set on the logger passed to this constructor
   module LoggerMixin
+    include Context
+
     delegate :register_secret, :register_secret_regex, to: :redactor
 
-    def global_context=(context)
-      Context::Handler.new(context).set!
+    def global_context
+      @global_context ||= Context::EMPTY_CONTEXT
     end
 
-    def with_context(context)
-      context_handler = Context::Handler.new(current_context_for_thread.deep_merge(context))
-      context_handler.set!
+    def global_context=(context)
+      if (global_context_lock_message = ::ContextualLogger.global_context_lock_message)
+        raise ::ContextualLogger::GlobalContextIsLocked, global_context_lock_message
+      end
+      @global_context = context.freeze
+    end
+
+    def current_context
+      current_context_override || global_context
+    end
+
+    # TODO: Deprecate current_context_for_thread in v2.0.
+    alias current_context_for_thread current_context
+
+    def with_context(stacked_context)
+      context_handler = ContextHandler.new(self, current_context_override)
+      self.current_context_override = deep_merge_with_current_context(stacked_context)
+
       if block_given?
         begin
           yield
@@ -59,13 +82,9 @@ module ContextualLogger
           context_handler.reset!
         end
       else
-        # If no block given, the context handler is returned to the caller so they can handle reset! themselves.
+        # If no block given, return context handler to the caller so they can call reset! themselves.
         context_handler
       end
-    end
-
-    def current_context_for_thread
-      Context::Handler.current_context
     end
 
     # In the methods generated below, we assume that presence of context means new code that is
@@ -102,7 +121,7 @@ module ContextualLogger
 
     # Note that this interface needs to stay compatible with the underlying ::Logger#add interface,
     # which is: def add(severity, message = nil, progname = nil)
-    def add(arg_severity, arg1 = nil, arg2 = nil, **context)   # Ruby will prefer to match hashes up to last ** argument
+    def add(arg_severity, arg1 = nil, arg2 = nil, **context)   # Ruby will prefer to match hashes to last argument because of **
       severity = arg_severity || UNKNOWN
       if log_level_enabled?(severity)
         if arg1.nil?
@@ -117,7 +136,7 @@ module ContextualLogger
           message = arg1
           progname = arg2 || @progname
         end
-        write_entry_to_log(severity, Time.now, progname, message, context: current_context_for_thread.deep_merge(context))
+        write_entry_to_log(severity, Time.now, progname, message, context: deep_merge_with_current_context(context))
       end
 
       true
@@ -141,7 +160,7 @@ module ContextualLogger
       normalized_message = ContextualLogger.normalize_message(message)
       normalized_progname = ContextualLogger.normalize_message(progname) unless progname.nil?
       if @formatter
-        @formatter.call(severity, timestamp, normalized_progname, { message: normalized_message }.merge!(context))
+        @formatter.call(severity, timestamp, normalized_progname, { message: normalized_message, **context })
       else
         "#{basic_json_log_entry(severity, timestamp, normalized_progname, normalized_message, context: context)}\n"
       end
@@ -151,12 +170,20 @@ module ContextualLogger
       message_hash = {
         message: normalized_progname ? "#{normalized_progname}: #{normalized_message}" : normalized_message,
         severity:  severity,
-        timestamp: timestamp
+        timestamp: timestamp,
+        **context
       }
       message_hash[:progname] = normalized_progname if normalized_progname
 
-      # merge! is faster and OK here since message_hash is still local only to this method
-      message_hash.merge!(context).to_json
+      message_hash.to_json
+    end
+
+    def deep_merge_with_current_context(stacked_context)
+      if stacked_context.any?
+        current_context.deep_merge(stacked_context)
+      else
+        current_context
+      end
     end
   end
 end

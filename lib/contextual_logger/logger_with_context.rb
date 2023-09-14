@@ -6,6 +6,13 @@ module ContextualLogger
   # A logger that deep_merges additional context and then delegates to the given logger.
   # Keeps it own log level (called override_level) that may be set independently of the logger it delegates to.
   # If override_level is non-nil, it takes precedence; if it is nil (the default), then it delegates to the logger.
+  #
+  # Context Precedence:
+  # 1. inline **context passed to the logger method
+  # 2. `with_context` overrides on this LoggerWithContext object
+  # 3. context passed to this LoggerWithContext constructor
+  # 4. `with_context` overrides on the logger passed to this constructor
+  # 5. `global_context` set on the logger passed to this constructor
   class LoggerWithContext
     include LoggerMixin
 
@@ -16,7 +23,13 @@ module ContextualLogger
       @logger = logger
       self.level = level
       @context = normalize_context(context)
-      @merged_context_cache = {}  # so we don't have to merge every time
+    end
+
+    # TODO: It's a (small) bug that the global_context is memoized at this point. There's a chance that the @logger.current_context
+    # changes after this because of an enclosing @logger.with_context block. If that happens, we'll miss that extra context.
+    # The tradeoff is that we don't want to keep calling deep_merge.
+    def global_context
+      @global_context ||= @logger.current_context.deep_merge(@context) # this will include any with_context overrides on the `logger`
     end
 
     def level
@@ -29,10 +42,10 @@ module ContextualLogger
 
     def write_entry_to_log(severity, timestamp, progname, message, context:)
       merged_context =
-        if @merged_context_cache.size >= 1000 # keep this cache memory use finite
-          @merged_context_cache[context] || @context.deep_merge(context)
+        if context.any?
+          current_context.deep_merge(context)
         else
-          @merged_context_cache[context] ||= @context.deep_merge(context)
+          current_context
         end
 
       @logger.write_entry_to_log(severity, timestamp, progname, message, context: merged_context)
