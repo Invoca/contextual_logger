@@ -19,6 +19,9 @@ module ContextualLogger
     unknown: Logger::Severity::UNKNOWN
   }.freeze
 
+  class LambdaAlreadyDefinedError < StandardError
+  end
+
   class << self
     def new(logger)
       logger.extend(LoggerMixin)
@@ -55,6 +58,26 @@ module ContextualLogger
 
     def global_context
       @global_context ||= Context::EMPTY_CONTEXT
+    end
+
+    def add_global_context_lambda(field, lambda)
+      if field.blank?
+        raise ArgumentError, "The field cannot be empty"
+      end
+
+      unless lambda.respond_to?(:call)
+        raise ArgumentError, "A lambda must respond to the :call method"
+      end
+
+      if global_context_lambdas[field]
+        raise ::ContextualLogger::LambdaAlreadyDefinedError, "A lambda for `#{field}` is already defined"
+      end
+
+      @global_context_lambdas[field] = lambda
+    end
+
+    def global_context_lambdas
+      @global_context_lambdas ||= {}
     end
 
     def global_context=(context)
@@ -136,7 +159,8 @@ module ContextualLogger
           message = arg1
           progname = arg2 || @progname
         end
-        write_entry_to_log(severity, Time.now, progname, message, context: deep_merge_with_current_context(context))
+        full_context = evaluate_global_context_lambdas(deep_merge_with_current_context(context))
+        write_entry_to_log(severity, Time.now, progname, message, context: full_context)
       end
 
       true
@@ -183,6 +207,14 @@ module ContextualLogger
         current_context.deep_merge(stacked_context)
       else
         current_context
+      end
+    end
+
+    def evaluate_global_context_lambdas(context)
+      if global_context_lambdas.empty?
+        context
+      else
+        global_context_lambdas.transform_values { |lambda| lambda.call }.merge(context)
       end
     end
   end
