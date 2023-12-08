@@ -2,7 +2,7 @@ PATH
   remote: .
   specs:
     contextual_logger (1.3.0)
-      activesupport
+      activesupport (< 7.1)
       json
 
 GEM
