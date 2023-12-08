@@ -8,6 +8,9 @@ Note: this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0
 ### Added
 - `ContextualLogger::LoggerMixin#redact` method to expose the existing redaction logic outside of just logs.
 
+### Changed
+- Limit `activesupport` gem to versions less than 7.1 due to a bug with ActiveSupport Broadcast interface changes.
+
 ## [1.2.0] - 2023-09-14
 ### Changed
 - Changed global_context to be stored inside the logger.
