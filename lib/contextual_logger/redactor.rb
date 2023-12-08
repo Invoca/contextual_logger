@@ -21,6 +21,8 @@ module ContextualLogger
       end
     end
 
+    # @param log_line [String]
+    # @return [String]
     def redact(log_line)
       if redaction_regex
         log_line.gsub(redaction_regex, '<redacted>')

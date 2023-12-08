@@ -27,6 +27,7 @@ describe ContextualLogger do
   it { is_expected.to respond_to(:with_context) }
   it { is_expected.to respond_to(:current_context) }
   it { is_expected.to respond_to(:current_context_for_thread) } # for backward-compatibility
+  it { is_expected.to respond_to(:redact) }
 
   context 'with logger writing to log_stream' do
     let(:log_stream) { StringIO.new }
