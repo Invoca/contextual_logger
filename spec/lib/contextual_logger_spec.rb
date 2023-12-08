@@ -27,6 +27,7 @@ describe ContextualLogger do
   it { is_expected.to respond_to(:with_context) }
   it { is_expected.to respond_to(:current_context) }
   it { is_expected.to respond_to(:current_context_for_thread) } # for backward-compatibility
+  it { is_expected.to respond_to(:redact) }
 
   context 'with logger writing to log_stream' do
     let(:log_stream) { StringIO.new }
@@ -100,7 +101,13 @@ describe ContextualLogger do
       let(:log_level) { Logger::Severity::ERROR }
       let(:console_log_stream) { StringIO.new }
       let(:console_logger) { Logger.new(console_log_stream) }
-      let(:broadcast_logger) { logger.extend(ActiveSupport::Logger.broadcast(console_logger)) }
+      let(:broadcast_logger) do
+        if ::ActiveSupport::VERSION::STRING < "7.1"
+          logger.extend(::ActiveSupport::Logger.broadcast(console_logger))
+        else
+          ActiveSupport::BroadcastLogger.new(logger, console_logger)
+        end
+      end
 
       it 'properly broadcasts to both logs when level-named method is called' do
         log_at_every_level(broadcast_logger, service: 'test_service')

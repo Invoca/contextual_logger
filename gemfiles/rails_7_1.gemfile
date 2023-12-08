@@ -3,7 +3,7 @@
 source "http://rubygems.org"
 
 gem "coveralls", require: false
-gem "activesupport", "~> 7.0"
+gem "activesupport", "~> 7.1"
 gem "appraisal"
 gem "bump", "~> 0.6.1"
 gem "pry"

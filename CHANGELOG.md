@@ -4,6 +4,13 @@ Inspired by [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Note: this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] 2023-12-08
+### Added
+- `ContextualLogger::LoggerMixin#redact` method to expose the existing redaction logic outside of just logs.
+
+### Changed
+- Limit `activesupport` gem to versions less than 7.1 due to a bug with ActiveSupport Broadcast interface changes.
+
 ## [1.2.0] - 2023-09-14
 ### Changed
 - Changed global_context to be stored inside the logger.

@@ -51,7 +51,7 @@ module ContextualLogger
   module LoggerMixin
     include Context
 
-    delegate :register_secret, :register_secret_regex, to: :redactor
+    delegate :register_secret, :register_secret_regex, :redact, to: :redactor
 
     def global_context
       @global_context ||= Context::EMPTY_CONTEXT
