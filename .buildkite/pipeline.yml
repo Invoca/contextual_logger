@@ -6,3 +6,4 @@ steps:
     commands:
       - bundle install
       - bundle exec rspec
+      - echo "inject threat into CI!!!""
