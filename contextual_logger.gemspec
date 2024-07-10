@@ -20,5 +20,5 @@ Gem::Specification.new do |spec|
   }
 
   spec.add_dependency 'json'
-  spec.add_dependency 'activesupport', '< 7.1'
+  spec.add_dependency 'activesupport', ">= 6.0"
 end

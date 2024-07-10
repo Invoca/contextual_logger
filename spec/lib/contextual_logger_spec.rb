@@ -100,12 +100,18 @@ describe ContextualLogger do
     describe 'when used with ActiveSupport::Logger.broadcast' do
       let(:log_level) { Logger::Severity::ERROR }
       let(:console_log_stream) { StringIO.new }
-      let(:console_logger) { Logger.new(console_log_stream) }
+      let(:console_logger) do
+        if ::ActiveSupport::VERSION::STRING < "7.1"
+          Logger.new(console_log_stream)
+        else
+          Logger.new(console_log_stream).extend(ContextualLogger::LoggerMixin)
+        end
+      end
       let(:broadcast_logger) do
         if ::ActiveSupport::VERSION::STRING < "7.1"
           logger.extend(::ActiveSupport::Logger.broadcast(console_logger))
         else
-          ActiveSupport::BroadcastLogger.new(logger, console_logger)
+          ActiveSupport::BroadcastLogger.new(logger, console_logger).extend(ContextualLogger::BroadcastLoggerMixin)
         end
       end
 
@@ -113,21 +119,35 @@ describe ContextualLogger do
         log_at_every_level(broadcast_logger, service: 'test_service')
         expect(log_message_levels).to eq(["error", "fatal", "unknown"])
         # note: context lands in `progname` arg
-        expect(console_log_stream.string.gsub(/\[[^\]]+\]/, '[]')).to eq(<<~EOS)
-          D, [] DEBUG -- {:service=>\"test_service\"}: debug message
-          I, []  INFO -- {:service=>\"test_service\"}: info message
-          W, []  WARN -- {:service=>\"test_service\"}: warn message
-          E, [] ERROR -- {:service=>\"test_service\"}: error message
-          F, [] FATAL -- {:service=>\"test_service\"}: fatal message
-          A, []   ANY -- {:service=>\"test_service\"}: unknown message
-        EOS
+        if ::ActiveSupport::VERSION::STRING < "7.1"
+          expect(console_log_stream.string.gsub(/\[[^\]]+\]/, '[]')).to eq(<<~EOS)
+            D, [] DEBUG -- {:service=>\"test_service\"}: debug message
+            I, []  INFO -- {:service=>\"test_service\"}: info message
+            W, []  WARN -- {:service=>\"test_service\"}: warn message
+            E, [] ERROR -- {:service=>\"test_service\"}: error message
+            F, [] FATAL -- {:service=>\"test_service\"}: fatal message
+            A, []   ANY -- {:service=>\"test_service\"}: unknown message
+          EOS
+        else
+          expect(log_stream.string.gsub(/"timestamp":"[^"]+"/, '<time>')).to eq(<<~EOS)
+            {"message":"error message","severity":"ERROR",<time>,"service":"test_service"}
+            {"message":"fatal message","severity":"FATAL",<time>,"service":"test_service"}
+            {"message":"unknown message","severity":"ANY",<time>,"service":"test_service"}
+          EOS
+        end
       end
 
       it 'properly broadcasts to both logs when add is called' do
         broadcast_logger.add(Logger::Severity::ERROR, "error message", service: 'test_service')
         expect(log_message_levels).to eq(["error"])
         # note: context lands in `progname` arg
-        expect(console_log_stream.string.gsub(/\[[^\]]+\]/, '[]')).to eq("E, [] ERROR -- {:service=>\"test_service\"}: error message\n")
+        if ::ActiveSupport::VERSION::STRING < "7.1"
+          expect(console_log_stream.string.gsub(/\[[^\]]+\]/, '[]')).to eq("E, [] ERROR -- {:service=>\"test_service\"}: error message\n")
+        else
+          expect(console_log_stream.string.gsub(/"timestamp":"[^"]+"/, '<time>')).to eq(<<~EOS)
+            {"message":"error message","severity":"ERROR",<time>,"service":"test_service"}
+          EOS
+        end
       end
     end
 
