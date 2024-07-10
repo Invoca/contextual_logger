@@ -43,6 +43,15 @@ end
 
 contextual_logger = ApplicationLogger.new(STDOUT)
 ```
+### Initialization of an ActiveSupport::BroadcastLogger
+ActiveSupport 7.1 added a BroadcastLogger class. In order to broadcast logs including context, you need to `extend` the BroadcastLogger instance with a separate mixin:
+```ruby
+logger           = Logger.new(STDOUT).extend(ContextualLogger::LoggerMixin)
+other_logger     = Logger.new(other_log_stream).extend(ContextualLogger::LoggerMixin)
+broadcast_logger = ActiveSupport::BroadcastLogger.new(logger, console_logger).extend(ContextualLogger::BroadcastLoggerMixin)
+```
+All loggers being passed to the BroadcastLogger must also be contextual loggers.
+
 ## Ways to Set Context
 Context may be provided any of 3 ways. Typically, all 3 will be used together.
 

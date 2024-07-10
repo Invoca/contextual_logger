@@ -186,4 +186,16 @@ module ContextualLogger
       end
     end
   end
+
+  module BroadcastLoggerMixin
+    method_names = LOG_LEVEL_NAMES_TO_SEVERITY.keys << :add
+
+    method_names.each do |method_name|
+      class_eval(<<~EOS, __FILE__, __LINE__ + 1)
+        def #{method_name}(...)
+          dispatch { |logger| logger.#{method_name}(...) }
+        end
+      EOS
+    end
+  end
 end
