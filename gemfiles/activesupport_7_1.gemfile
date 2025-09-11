@@ -4,7 +4,7 @@ source "https://rubygems.org"
 
 gem "coveralls", require: false
 gem "appraisal"
-gem "appraisal-matrix", "0.1.0"
+gem "appraisal-matrix"
 gem "bump", "~> 0.6.1"
 gem "pry"
 gem "rake"
