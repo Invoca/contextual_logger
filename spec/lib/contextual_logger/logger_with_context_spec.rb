@@ -126,6 +126,54 @@ describe ContextualLogger::LoggerWithContext do
       end
     end
 
+    describe "log level predicates" do
+      it "delegates to DEBUG level" do
+        subject.level = Logger::Severity::DEBUG
+        expect(subject.debug?).to eq(true)
+        expect(subject.info?).to eq(true)
+        expect(subject.warn?).to eq(true)
+        expect(subject.error?).to eq(true)
+        expect(subject.fatal?).to eq(true)
+      end
+
+      it "delegates to INFO level" do
+        subject.level = Logger::Severity::INFO
+        expect(subject.debug?).to eq(false)
+        expect(subject.info?).to eq(true)
+        expect(subject.warn?).to eq(true)
+        expect(subject.error?).to eq(true)
+        expect(subject.fatal?).to eq(true)
+      end
+
+      it "delegates to WARN level" do
+        subject.level = nil
+        base_logger.level = Logger::Severity::WARN
+        expect(subject.debug?).to eq(false)
+        expect(subject.info?).to eq(false)
+        expect(subject.warn?).to eq(true)
+        expect(subject.error?).to eq(true)
+        expect(subject.fatal?).to eq(true)
+      end
+
+      it "delegates to ERROR level" do
+        subject.level = Logger::Severity::ERROR
+        expect(subject.debug?).to eq(false)
+        expect(subject.info?).to eq(false)
+        expect(subject.warn?).to eq(false)
+        expect(subject.error?).to eq(true)
+        expect(subject.fatal?).to eq(true)
+      end
+
+      it "delegates to FATAL level" do
+        subject.level = Logger::Severity::FATAL
+        expect(subject.debug?).to eq(false)
+        expect(subject.info?).to eq(false)
+        expect(subject.warn?).to eq(false)
+        expect(subject.error?).to eq(false)
+        expect(subject.fatal?).to eq(true)
+      end
+    end
+
     context "when string passed as context key" do
       it "returns context with a symbol key" do
         context_with_string_key = { "log_source" => "redis_client" }
