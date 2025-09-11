@@ -50,6 +50,7 @@ GEM
     logger (1.7.0)
     method_source (1.0.0)
     minitest (5.25.5)
+    mutex_m (0.3.0)
     parallel (1.23.0)
     parser (3.2.2.3)
       ast (~> 2.4.1)
@@ -115,6 +116,7 @@ DEPENDENCIES
   bump (~> 0.6.1)
   contextual_logger!
   coveralls
+  mutex_m
   pry
   rake
   rspec

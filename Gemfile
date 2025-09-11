@@ -9,6 +9,7 @@ gem 'coveralls', require: false
 gem 'appraisal'
 gem 'appraisal-matrix'
 gem 'bump', '~> 0.6.1'
+gem 'mutex_m'
 gem 'pry'
 gem 'rake'
 gem 'rubocop', '0.54.0'
