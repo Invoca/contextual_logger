@@ -40,7 +40,7 @@ module ContextualLogger
       @override_level = (ContextualLogger.normalize_log_level(override_level) if override_level)
     end
 
-    LOG_LEVEL_NAMES_TO_SEVERITY.except(:unknown).each do |severity, log_level|
+    ::ContextualLogger::LOG_LEVEL_NAMES_TO_SEVERITY.except(:unknown).each do |severity, log_level|
       define_method("#{severity}?") do
         log_level_enabled?(log_level)
       end

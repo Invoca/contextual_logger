@@ -11,12 +11,12 @@ require_relative './contextual_logger/global_context_lock_message'
 module ContextualLogger
   LOG_LEVEL_NAMES_TO_SEVERITY =
   {
-    debug:  Logger::Severity::DEBUG,
-    info:   Logger::Severity::INFO,
-    warn:   Logger::Severity::WARN,
-    error:  Logger::Severity::ERROR,
-    fatal:  Logger::Severity::FATAL,
-    unknown: Logger::Severity::UNKNOWN
+    debug:  ::Logger::Severity::DEBUG,
+    info:   ::Logger::Severity::INFO,
+    warn:   ::Logger::Severity::WARN,
+    error:  ::Logger::Severity::ERROR,
+    fatal:  ::Logger::Severity::FATAL,
+    unknown: ::Logger::Severity::UNKNOWN
   }.freeze
 
   class << self
