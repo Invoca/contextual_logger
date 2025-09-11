@@ -60,16 +60,13 @@ module ContextualLogger
     private
 
     def normalize_context(context)
-      if warn_on_string_keys(context)
-        context.deep_symbolize_keys
-      else
-        context
-      end
+      raise_on_string_keys(context)
+      context
     end
 
-    def warn_on_string_keys(context)
+    def raise_on_string_keys(context)
       if deep_key_has_string?(context)
-        ActiveSupport::Deprecation.warn('Context keys must use symbols not strings. This will be asserted as of contextual_logger v1.0.0')
+        raise ArgumentError, "context keys must use symbols not strings: #{context.inspect}"
       end
     end
 
