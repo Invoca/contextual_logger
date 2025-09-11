@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'logger' # required first to get ::Logger defined for ActiveSupport 7.0
 require 'active_support'
 require 'active_support/core_ext/module/delegation'
 require 'json'
