@@ -1,23 +1,26 @@
 PATH
   remote: .
   specs:
-    contextual_logger (1.4.0)
+    contextual_logger (1.5.0)
       activesupport (>= 6.0)
       json
 
 GEM
   remote: https://rubygems.org/
   specs:
-    activesupport (7.1.3.4)
+    activesupport (8.0.2.1)
       base64
+      benchmark (>= 0.3)
       bigdecimal
-      concurrent-ruby (~> 1.0, >= 1.0.2)
+      concurrent-ruby (~> 1.0, >= 1.3.1)
       connection_pool (>= 2.2.5)
       drb
       i18n (>= 1.6, < 2)
+      logger (>= 1.4.2)
       minitest (>= 5.1)
-      mutex_m
-      tzinfo (~> 2.0)
+      securerandom (>= 0.3)
+      tzinfo (~> 2.0, >= 2.0.5)
+      uri (>= 0.13.1)
     appraisal (2.5.0)
       bundler
       rake
@@ -25,12 +28,13 @@ GEM
     appraisal-matrix (0.2.0)
       appraisal (~> 2.2)
     ast (2.4.2)
-    base64 (0.2.0)
-    bigdecimal (3.1.8)
+    base64 (0.3.0)
+    benchmark (0.4.1)
+    bigdecimal (3.2.3)
     bump (0.6.1)
     coderay (1.1.3)
-    concurrent-ruby (1.3.3)
-    connection_pool (2.4.1)
+    concurrent-ruby (1.3.5)
+    connection_pool (2.5.4)
     coveralls (0.8.23)
       json (>= 1.8, < 3)
       simplecov (~> 0.16.1)
@@ -39,13 +43,14 @@ GEM
       tins (~> 1.6)
     diff-lcs (1.5.0)
     docile (1.4.0)
-    drb (2.2.1)
-    i18n (1.14.5)
+    drb (2.2.3)
+    i18n (1.14.7)
       concurrent-ruby (~> 1.0)
     json (2.6.3)
+    logger (1.7.0)
     method_source (1.0.0)
-    minitest (5.24.1)
-    mutex_m (0.2.0)
+    minitest (5.25.5)
+    mutex_m (0.3.0)
     parallel (1.23.0)
     parser (3.2.2.3)
       ast (~> 2.4.1)
@@ -85,6 +90,7 @@ GEM
     ruby-prof-flamegraph (0.3.0)
       ruby-prof (~> 0.13)
     ruby-progressbar (1.13.0)
+    securerandom (0.4.1)
     simplecov (0.16.1)
       docile (~> 1.1)
       json (>= 1.8, < 3)
@@ -93,12 +99,13 @@ GEM
     sync (0.5.0)
     term-ansicolor (1.7.1)
       tins (~> 1.0)
-    thor (1.3.1)
+    thor (1.4.0)
     tins (1.32.1)
       sync
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
     unicode-display_width (1.8.0)
+    uri (1.0.3)
 
 PLATFORMS
   ruby
@@ -109,6 +116,7 @@ DEPENDENCIES
   bump (~> 0.6.1)
   contextual_logger!
   coveralls
+  mutex_m
   pry
   rake
   rspec

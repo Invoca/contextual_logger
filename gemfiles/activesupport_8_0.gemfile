@@ -15,6 +15,6 @@ gem "ruby-prof"
 gem "ruby-prof-flamegraph"
 gem "rspec"
 gem "rspec_junit_formatter"
-gem "activesupport", "~> 7.1.0"
+gem "activesupport", "~> 8.0.0"
 
 gemspec path: "../"

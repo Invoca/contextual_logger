@@ -120,13 +120,13 @@ describe ContextualLogger do
         expect(log_message_levels).to eq(["error", "fatal", "unknown"])
         # note: context lands in `progname` arg
         if ::ActiveSupport::VERSION::STRING < "7.1"
-          expect(console_log_stream.string.gsub(/\[[^\]]+\]/, '[]')).to eq(<<~EOS)
-            D, [] DEBUG -- {:service=>\"test_service\"}: debug message
-            I, []  INFO -- {:service=>\"test_service\"}: info message
-            W, []  WARN -- {:service=>\"test_service\"}: warn message
-            E, [] ERROR -- {:service=>\"test_service\"}: error message
-            F, [] FATAL -- {:service=>\"test_service\"}: fatal message
-            A, []   ANY -- {:service=>\"test_service\"}: unknown message
+          expect(console_log_stream.string.gsub(/\[[^\]]+\]/, '[]').gsub(':service=>', 'service: ')).to eq(<<~EOS)
+            D, [] DEBUG -- {service: \"test_service\"}: debug message
+            I, []  INFO -- {service: \"test_service\"}: info message
+            W, []  WARN -- {service: \"test_service\"}: warn message
+            E, [] ERROR -- {service: \"test_service\"}: error message
+            F, [] FATAL -- {service: \"test_service\"}: fatal message
+            A, []   ANY -- {service: \"test_service\"}: unknown message
           EOS
         else
           expect(log_stream.string.gsub(/"timestamp":"[^"]+"/, '<time>')).to eq(<<~EOS)
@@ -142,7 +142,7 @@ describe ContextualLogger do
         expect(log_message_levels).to eq(["error"])
         # note: context lands in `progname` arg
         if ::ActiveSupport::VERSION::STRING < "7.1"
-          expect(console_log_stream.string.gsub(/\[[^\]]+\]/, '[]')).to eq("E, [] ERROR -- {:service=>\"test_service\"}: error message\n")
+          expect(console_log_stream.string.gsub(/\[[^\]]+\]/, '[]').gsub(':service=>', 'service: ')).to eq("E, [] ERROR -- {service: \"test_service\"}: error message\n")
         else
           expect(console_log_stream.string.gsub(/"timestamp":"[^"]+"/, '<time>')).to eq(<<~EOS)
             {"message":"error message","severity":"ERROR",<time>,"service":"test_service"}
