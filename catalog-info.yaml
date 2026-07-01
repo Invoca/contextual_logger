@@ -30,4 +30,5 @@ spec:
   type: library
   lifecycle: production
   owner: octothorpe
+  system: platform-observability
   dependsOn: []
