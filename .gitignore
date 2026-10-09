@@ -55,3 +55,12 @@ build-iPhoneSimulator/
 
 # appraisal
 gemfiles/*.lock
+
+# ADLC
+/adlc
+/adlc-cli
+/.env
+/.mcp.json
+.adlc/demos/
+.worktrees/
+.architecture-pipeline-cache/

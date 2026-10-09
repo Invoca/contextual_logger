@@ -1,0 +1,95 @@
+# ADLC PR Review — synced caller stub. Do not hand-edit; re-synced by
+# scripts/sync-adlc-consumer-repos.ts and by /adlc-init (see
+# adlc-init.md § Automated Adversarial PR Review — Rollout Path).
+#
+# The review logic itself lives once, centrally, in Invoca/ADLC's own
+# .github/workflows/adlc-pr-review.yml (a workflow_call reusable workflow) —
+# this file only wires the trigger and pins which tagged copy of that
+# workflow this repo currently calls. See that file's own header comment for
+# the full mechanism (symlink bootstrap, in-repo short-circuit, tool
+# allowlist).
+name: ADLC PR Review
+
+on:
+  pull_request:
+    types: [opened, ready_for_review, synchronize, labeled]
+
+jobs:
+  review:
+    # Explicit `permissions:` override (#1171 review MAJOR finding, round
+    # 3): a `workflow_call` reusable workflow's job-level `permissions:`
+    # grants are capped by the CALLING job's own effective GITHUB_TOKEN --
+    # they can only narrow what the caller already has, never escalate
+    # beyond it. This job declared no `permissions:` override of its own, so
+    # its ambient token fell back to whatever a consumer repo's default
+    # Actions token permissions happen to be -- read-only on any repo
+    # configured that way -- which would silently cap the reusable
+    # workflow's `cancel-on-pause` job's own `actions: write` grant down to
+    # read-only. Every `gh run cancel` call there would then 403: that
+    # failure DOES now emit a `::warning::` annotation (#1171 review MAJOR
+    # finding, round 3) rather than being silently swallowed by a bare
+    # `|| true` (see `adlc-pr-review.yml`'s own `cancel-on-pause` job header
+    # comment for the full explanation), but the job would still exit 0 and
+    # never actually cancel anything -- defeating AC3/Requirement 4
+    # (in-flight cancellation) in practice even though it's no longer silent.
+    # This `permissions:` override here is what prevents the capping in the
+    # first place; the `::warning::` is defense-in-depth for whatever else
+    # could make `gh run cancel` fail, not a substitute for this override.
+    #
+    # `contents: read` is included alongside `actions: write`, not just
+    # `actions: write` alone: declaring ANY job-level `permissions:` block
+    # replaces the job's entire default permission set rather than adding to
+    # it -- every scope left unlisted becomes `none`. Without `contents:
+    # read` here too, this override would itself cap the reusable workflow's
+    # OWN workflow-level `contents: read` (needed by its ordinary `review`
+    # job's `actions/checkout` steps) down to `none`, breaking every normal
+    # review run just to fix cancel-on-pause.
+    permissions:
+      contents: read
+      actions: write
+    # synchronize also fires while a PR is still in draft, and opened fires
+    # for a PR created directly as a draft — gate here so neither a
+    # draft-phase push nor a directly-opened draft PR triggers a premature
+    # review. ready_for_review itself only ever fires once a PR leaves
+    # draft, so this condition is always true on that trigger; it only ever
+    # excludes draft-phase opened and synchronize events.
+    #
+    # This job's uses: line below is the ONLY thing that ever invokes the
+    # reusable workflow, so this if: must let a labeled+adlc:paused event
+    # through too -- otherwise cancel-on-pause (defined in the reusable
+    # workflow this calls, gated on exactly that event) could never run
+    # regardless of its own if:, defeating the "stop an already-running bot
+    # run" half of break-glass (#1171 round-1 review fix: this was
+    # previously a single AND-chain that excluded every labeled event,
+    # cancel-on-pause included). It is now an OR of two mutually-exclusive
+    # paths for any single event:
+    #   - Ordinary review path (unchanged): non-draft, non-labeled,
+    #     non-paused. github.event.action != 'labeled' excludes every OTHER
+    #     label add from starting a review (adding "needs-triage", say,
+    #     would otherwise satisfy draft == false and start one).
+    #     !contains(...'adlc:paused') is the break-glass gate itself
+    #     (scripts/lib/adlc-break-glass-label.ts's PR_PAUSE_CHECK) -- a
+    #     zero-cost skip, evaluated before this job claims a runner, mints
+    #     any token, or checks out any code.
+    #   - Break-glass path (new): a labeled event naming adlc:paused itself
+    #     always reaches the reusable workflow, so its own cancel-on-pause
+    #     job -- gated on this identical action == 'labeled' && label.name
+    #     == 'adlc:paused' condition -- gets to run. This can never also
+    #     satisfy the first path's action != 'labeled' clause, and the
+    #     reusable workflow's own review job keeps its independent
+    #     defense-in-depth if: excluding labeled events, so this path only
+    #     ever reaches cancel-on-pause, never a real review.
+    # Any other labeled event (a different label being added) satisfies
+    # neither path and is skipped entirely, exactly as before. Removing
+    # adlc:paused is NOT a "labeled event" at all -- GitHub Actions fires the
+    # separate `unlabeled` action for that, which isn't in this trigger's
+    # `types:` list above, so a label removal never even reaches this `if:`
+    # to begin with (round-2 review MINOR fix: this comment previously
+    # mischaracterized removal as a `labeled` case). Auto-resume
+    # (Requirement 5) instead relies on whatever event DOES eventually
+    # re-trigger review after removal (e.g. the next `synchronize`), at which
+    # point the ordinary review path's own `!contains(...'adlc:paused')`
+    # clause simply passes again.
+    if: (github.event.pull_request.draft == false && github.event.action != 'labeled' && !contains(github.event.pull_request.labels.*.name, 'adlc:paused')) || (github.event.action == 'labeled' && github.event.label.name == 'adlc:paused')
+    uses: Invoca/ADLC/.github/workflows/adlc-pr-review.yml@fe59dede3180e9fb890f7a6eacf99c25e7cb27db # v3.16.2
+    secrets: inherit

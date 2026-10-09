@@ -1,0 +1,115 @@
+{
+  "version": 1,
+  "pending": [
+    {
+      "leaf": "sub-systems/lib-contextual-logger.md",
+      "section": "anchor-file-lib-contextual-logger-lib_contextual_logger_context_handler_rb",
+      "reason": "investigation-required"
+    },
+    {
+      "leaf": "sub-systems/lib-contextual-logger.md",
+      "section": "anchor-file-lib-contextual-logger-lib_contextual_logger_context_rb",
+      "reason": "investigation-required"
+    },
+    {
+      "leaf": "sub-systems/lib-contextual-logger.md",
+      "section": "anchor-file-lib-contextual-logger-lib_contextual_logger_rb",
+      "reason": "investigation-required"
+    },
+    {
+      "leaf": "sub-systems/lib-contextual-logger.md",
+      "section": "dependency-lib-contextual-logger-no-entries",
+      "reason": "investigation-required"
+    },
+    {
+      "leaf": "sub-systems/lib-contextual-logger.md",
+      "section": "key-invariants",
+      "reason": "structurally-not-derivable"
+    },
+    {
+      "leaf": "sub-systems/lib-contextual-logger.md",
+      "section": "known-limitations",
+      "reason": "structurally-not-derivable"
+    },
+    {
+      "leaf": "sub-systems/lib-contextual-logger.md",
+      "section": "last-hardened",
+      "reason": "investigation-required"
+    },
+    {
+      "leaf": "sub-systems/lib-contextual-logger.md",
+      "section": "public-contract",
+      "reason": "structurally-not-derivable"
+    },
+    {
+      "leaf": "sub-systems/lib-contextual-logger.md",
+      "section": "purpose",
+      "reason": "structurally-not-derivable"
+    },
+    {
+      "leaf": "sub-systems/lib-contextual-logger.md",
+      "section": "runtime-sequence-diagrams",
+      "reason": "investigation-required"
+    },
+    {
+      "leaf": "sub-systems/lib-contextual-logger.md",
+      "section": "security-posture",
+      "reason": "investigation-required"
+    },
+    {
+      "leaf": "sub-systems/lib-contextual-logger.md",
+      "section": "state-owned",
+      "reason": "structurally-not-derivable"
+    },
+    {
+      "leaf": "sub-systems/root.md",
+      "section": "anchor-file-root-no-entries",
+      "reason": "investigation-required"
+    },
+    {
+      "leaf": "sub-systems/root.md",
+      "section": "dependency-root-no-entries",
+      "reason": "investigation-required"
+    },
+    {
+      "leaf": "sub-systems/root.md",
+      "section": "key-invariants",
+      "reason": "structurally-not-derivable"
+    },
+    {
+      "leaf": "sub-systems/root.md",
+      "section": "known-limitations",
+      "reason": "structurally-not-derivable"
+    },
+    {
+      "leaf": "sub-systems/root.md",
+      "section": "last-hardened",
+      "reason": "investigation-required"
+    },
+    {
+      "leaf": "sub-systems/root.md",
+      "section": "public-contract",
+      "reason": "structurally-not-derivable"
+    },
+    {
+      "leaf": "sub-systems/root.md",
+      "section": "purpose",
+      "reason": "structurally-not-derivable"
+    },
+    {
+      "leaf": "sub-systems/root.md",
+      "section": "runtime-sequence-diagrams",
+      "reason": "investigation-required"
+    },
+    {
+      "leaf": "sub-systems/root.md",
+      "section": "security-posture",
+      "reason": "investigation-required"
+    },
+    {
+      "leaf": "sub-systems/root.md",
+      "section": "state-owned",
+      "reason": "structurally-not-derivable"
+    }
+  ]
+}

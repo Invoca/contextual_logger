@@ -1,0 +1,41 @@
+name: Board Auto-Add
+
+# Adds newly opened issues to Project 221 (Invoca org board) so they are visible to product
+# screening (product-issue-screening.md scopes triage entirely from the board — an issue never
+# added is invisible to it). See adlc-init.md "Board Intake vs. Status Automation" for how this
+# relates to the orchestrator's separate, agent-driven status-transition automation.
+#
+# project-url below is transcribed from docs/github-routing.yml's github.owner/github.project —
+# if that file's values ever change, update this literal to match in the same PR.
+
+on:
+  issues:
+    types: [opened]
+  workflow_dispatch: {}   # smoke-tests the workflow's syntax/permissions wiring only — the action
+                          # can't add a specific issue this way (no issue-number input, resolves
+                          # target from the triggering event's payload); to test the add itself,
+                          # open a real test issue and let `issues: opened` fire it
+
+# The default GITHUB_TOKEN is never used — the board mutation is authenticated entirely via a
+# short-lived token minted from the `invoca-adlc` GitHub App installation (see the "Mint
+# invoca-adlc App token" step below), and this workflow never checks out the repo. Zero ambient
+# permissions needed.
+permissions: {}
+
+jobs:
+  add-to-project:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Mint invoca-adlc App token
+        id: app-token
+        uses: actions/create-github-app-token@d72941d797fd3113feb6b93fd0dec494b13a2547 # v1.12.0
+        with:
+          app-id: ${{ secrets.ADLC_APP_ID }}
+          private-key: ${{ secrets.ADLC_APP_PRIVATE_KEY }}
+      - uses: actions/add-to-project@5afcf98fcd03f1c2f92c3c83f58ae24323cc57fd # v2.0.0
+        with:
+          project-url: https://github.com/orgs/Invoca/projects/221
+          github-token: ${{ steps.app-token.outputs.token }}
+          # No status input — the action adds with empty Status, and this repo's read
+          # convention (board-state.md) treats null Status as Open. The Board Hygiene sweep
+          # additionally makes this explicit on the board itself.

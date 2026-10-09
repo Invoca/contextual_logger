@@ -1,0 +1,13 @@
+github:
+  owner: Invoca                # org owning the Projects v2 project
+  project: 221                 # https://github.com/orgs/Invoca/projects/221 — "contextual_logger ADLC"
+  manual_qa_label: manual-qa   # per-ticket opt-in for the Manual QA status
+  requires_post_deploy: false  # this project does not use the Post Deploy holding stage
+  deploy:
+    environment: null          # no GitHub Deployments environment for this gem
+    pipeline: null             # no in-repo Buildkite deploy pipeline; releases are cut to RubyGems by hand
+  board_hygiene:
+    min_interval_hours: 12
+
+slack:
+  channel_id: C0C0U3YEFGV

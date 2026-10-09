@@ -1,0 +1,130 @@
+# Event-driven board-Status executor ("Close the ticket at merge when the PR
+# completes it: reinstate closing keywords + event-driven merge/deploy
+# handling"). Piloted on Invoca/ADLC's own repo
+# (docs/specs/235-close-ticket-at-merge-conditional-keywords.md §9a.6) — the
+# `/adlc-init` provisioning path that copies this workflow into a consumer
+# repo is documented, not executed, elsewhere (see adlc/methods/commands/
+# adlc-init.md § Event-Driven Board-Status Action).
+#
+# Two triggers, both real-time and event-driven — no session polling, no
+# scheduled re-scan:
+#
+#   pull_request: closed, filtered to merged == true (a closed-without-merge,
+#   i.e. an abandoned PR, is not a completion signal and is filtered out in
+#   the job condition below, not left to the script). This job also invokes
+#   the demo-video-to-Slack hook, unconditionally, for every issue the merged
+#   PR completes — see postDemoVideoForMergedPr() in
+#   .github/scripts/board-status-sync.ts.
+#
+#   deployment_status, filtered to state == success. Environment matching
+#   against docs/github-routing.yml's deploy.environment is done inside the
+#   script itself (not here), since the workflow trigger has no `if:` access
+#   to repo file contents without a checkout.
+#
+# This workflow is deliberately a thin trigger/wiring layer: all decision
+# logic (issue-number extraction, the Status Transition Matrix edge, the
+# idempotency check, terminal-close sequencing) lives in the directly
+# unit-tested .github/scripts/board-status-sync.ts (test/board-status-sync.
+# test.ts), never as untested inline `run:` shell — the same
+# extracted-and-unit-tested-script posture as create-deployment-signal.ts/
+# .yml, this repo's own synthetic-deployment-signal workflow.
+#
+# Token: GITHUB_TOKEN still cannot write Projects v2 fields (no `project`
+# scope, and Projects v2 is account-scoped rather than repo-scoped). Both
+# jobs below mint a short-lived token from the `invoca-adlc` GitHub App
+# installation (app id 4731568, installation id 156851257) via
+# actions/create-github-app-token@v1. That installation's confirmed
+# permissions (repository_projects: write, organization_projects: write,
+# issues: write, contents: write) cover every scope this workflow needs,
+# including the `issues: write` this workflow's `gh issue close` calls
+# require.
+#
+# The ambient GITHUB_TOKEN is deliberately scoped down to just `contents:
+# read` (for actions/checkout) below — every `gh` call in
+# board-status-sync.ts pins GH_TOKEN to the minted App token explicitly, so
+# the default token never needs `issues: write` or any other write scope;
+# granting it would only widen the ambient token's blast radius for no
+# reason.
+#
+# The merge job's ADLC_DEMO_AGENT_SLACK_TOKEN secret (files:write, chat:write scopes)
+# authenticates the demo-video-to-Slack post that fires, unconditionally, for
+# every issue a merged PR completes — see postDemoVideoForMergedPr() in this
+# file's own .github/scripts/board-status-sync.ts, which calls
+# postDemoVideoForIssue() in scripts/lib/demo-slack-post.ts (never the
+# top-level scripts/demo-slack-post.ts CLI, which is this framework's own
+# local dev tool and is never deployed to a consumer repo at all). Absent
+# entirely when this repo has no docs/github-routing.yml slack.channel_id
+# configured.
+name: Board Status Sync
+
+on:
+  pull_request:
+    types: [closed]
+  deployment_status:
+
+permissions:
+  contents: read
+
+jobs:
+  merge:
+    if: github.event_name == 'pull_request' && github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Mint invoca-adlc App token
+        id: app-token
+        uses: actions/create-github-app-token@d72941d797fd3113feb6b93fd0dec494b13a2547 # v1.12.0
+        with:
+          app-id: ${{ secrets.ADLC_APP_ID }}
+          private-key: ${{ secrets.ADLC_APP_PRIVATE_KEY }}
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+      - name: Sync board Status on merge
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          PR_MERGED: 'true'
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          ADLC_DEMO_AGENT_SLACK_TOKEN: ${{ secrets.ADLC_DEMO_AGENT_SLACK_TOKEN }}
+        run: |
+          if [[ -z "${GH_TOKEN:-}" ]]; then
+            echo "::error::invoca-adlc App token mint failed or produced an empty token. Confirm ADLC_APP_ID/ADLC_APP_PRIVATE_KEY are set and the invoca-adlc App installation (id 156851257) is still active — see docs/specs/ARCH-35-392-swap-add-to-project-pat-for-invoca-adlc-github-app-credentials-in-board-automation.md." >&2
+            exit 1
+          fi
+          .github/scripts/board-status-sync.ts merge
+
+  deploy:
+    if: github.event_name == 'deployment_status' && github.event.deployment_status.state == 'success'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: deploy-${{ github.event.deployment.id }}
+      cancel-in-progress: false
+    steps:
+      - name: Mint invoca-adlc App token
+        id: app-token
+        uses: actions/create-github-app-token@d72941d797fd3113feb6b93fd0dec494b13a2547 # v1.12.0
+        with:
+          app-id: ${{ secrets.ADLC_APP_ID }}
+          private-key: ${{ secrets.ADLC_APP_PRIVATE_KEY }}
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+      - name: Sync board Status on deploy
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          DEPLOY_SHA: ${{ github.event.deployment.sha }}
+          DEPLOY_ENVIRONMENT: ${{ github.event.deployment.environment }}
+        run: |
+          if [[ -z "${GH_TOKEN:-}" ]]; then
+            echo "::error::invoca-adlc App token mint failed or produced an empty token. Confirm ADLC_APP_ID/ADLC_APP_PRIVATE_KEY are set and the invoca-adlc App installation (id 156851257) is still active — see docs/specs/ARCH-35-392-swap-add-to-project-pat-for-invoca-adlc-github-app-credentials-in-board-automation.md." >&2
+            exit 1
+          fi
+          .github/scripts/board-status-sync.ts deploy
