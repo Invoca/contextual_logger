@@ -1,0 +1,21 @@
+# Merge Slack Post — synced caller stub. Do not hand-edit; re-synced by the
+# ADLC self-update (scripts/self-update-adlc-consumer.ts) and by /adlc-init.
+#
+# The merge→Slack journal-entry announcement logic itself lives once,
+# centrally, in the framework's merge-slack-post.yml (a workflow_call reusable
+# workflow), which Invoca/factory-platform hosts at the root path the uses:
+# line below names — this file only wires the trigger and calls that copy at
+# adlc-self-update-v1, the tag this repo's self-update already follows.
+# See that file's own header comment for the full mechanism (symlink
+# bootstrap, in-repo short-circuit, tool allowlist).
+name: Merge Slack Post
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  post:
+    if: github.event.pull_request.merged == true
+    uses: Invoca/factory-platform/.github/workflows/merge-slack-post-reusable.yml@adlc-self-update-v1
+    secrets: inherit
