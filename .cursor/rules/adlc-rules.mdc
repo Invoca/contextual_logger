@@ -1,0 +1,11 @@
+---
+description: ADLC project-wide rules — applies to every agent and subagent working in this repo.
+alwaysApply: true
+---
+
+These are the project-wide ADLC rules that apply to every agent and subagent working in this repo.
+They govern issue-work delegation, worktree isolation, and other cross-cutting session behavior.
+The canonical rule body lives in the file referenced below, not copied here, so there is a single source of truth and no drift.
+Read it before doing any work in this repository.
+
+@adlc/methods/session-rules.md

@@ -1,0 +1,78 @@
+# ADLC Mention — synced caller stub. Do not hand-edit; re-synced by
+# scripts/sync-adlc-consumer-repos.ts (ensureAdlcMentionWorkflow).
+#
+# The @adlc mention handler itself lives once, centrally, in Invoca/ADLC's
+# own .github/workflows/adlc-mention.yml (a workflow_call reusable
+# workflow) — this file only wires the triggers and pins which tagged copy
+# of that workflow this repo currently calls. See that file's own header
+# comment for the full mechanism (identity, tag-mode posting, tool
+# ceiling, dispatch loop).
+#
+# Job-level if: guard — a zero-cost skip, not a security control. This job
+# is a bare uses:-only reusable-workflow call (no runs-on: of its own), so a
+# job-level if: that evaluates false here means no runner is ever claimed
+# and the reusable workflow's own steps (checkout, token mint, bun install,
+# sibling checkout) never run at all for the common case of an ordinary
+# comment/issue that never mentions @adlc. contains() is a plain,
+# case-insensitive substring test (GitHub Actions expression semantics) —
+# deliberately looser than claude-code-action's own trigger_phrase regex,
+# which additionally requires a word boundary
+# ((^|\s)@adlc([\s.,!?;:]|$), case-insensitive) so @adlcbot/xyz@adlc
+# would NOT actually trigger the action. Because every string the action's
+# regex matches necessarily contains the literal substring @adlc, this
+# guard can only ever be a superset of what the action would trigger on —
+# it never skips a real mention. Exact word-boundary replication isn't
+# expressible in a GitHub Actions if: expression (no regex functions
+# available), so this is the closest safe approximation.
+#
+# The issue.body/issue.title clauses are scoped to github.event_name ==
+# 'issues' specifically, not checked on every event — for issue_comment and
+# pull_request_review_comment, github.event.issue is the parent issue or
+# PR, so an unscoped check against it would pass for every later comment on
+# any thread whose opening post (or, for a PR, its description) happens to
+# mention @adlc, including a bot-authored comment. Each such false positive
+# pays for the full bootstrap — fetch-depth: 0 clone, token mint, sibling
+# checkout, bun install — before the pinned action declines (it checks
+# write permission before the trigger phrase, so a read-only commenter's
+# false-positive run fails outright rather than skipping quietly).
+# Restricting those two clauses to issues: [opened], the one event with no
+# comment of its own yet to check instead, keeps this guard a superset of
+# what the action accepts without the parent-thread leak. sender.type !=
+# 'Bot' excludes bot-authored comments outright, since tag mode rejects bot
+# actors anyway (allowed_bots is unset).
+#
+# Break-glass (#1166): the two trailing !contains(...'adlc:paused') clauses
+# are a hand-embedded literal copy of
+# scripts/lib/adlc-break-glass-label.ts's MENTION_PAUSE_CHECK (GitHub
+# Actions YAML can't import that module — see that file's own header
+# comment for why, and for the golden-string test that keeps every embedded
+# copy in sync with it). No new trigger type is needed here — adlc-mention.yml
+# never reacted to pull_request events, and this doesn't add one; the pause
+# check only ever suppresses a mention that would otherwise fire, on
+# whatever thread already carries the label. Exactly one of
+# github.event.issue / github.event.pull_request is populated per event, and
+# a missing nested property resolves to null, which contains() treats as
+# "not found" rather than erroring, so both clauses are safe to evaluate
+# unconditionally.
+#
+# run-name: below is a hand-embedded literal copy of
+# scripts/lib/adlc-break-glass-label.ts's MENTION_RUN_NAME -- see that
+# constant's own header comment for why it lives on this caller stub (not the
+# reusable adlc-mention.yml workflow) and what it fixes in adlc-pr-review.yml's
+# cancel-on-pause job.
+name: ADLC Mention
+run-name: "ADLC Mention #${{ github.event.pull_request.number || github.event.issue.number }}"
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+  issues:
+    types: [opened]
+
+jobs:
+  mention:
+    if: (contains(github.event.comment.body, '@adlc') || (github.event_name == 'issues' && (contains(github.event.issue.body, '@adlc') || contains(github.event.issue.title, '@adlc')))) && github.event.sender.type != 'Bot' && !contains(github.event.issue.labels.*.name, 'adlc:paused') && !contains(github.event.pull_request.labels.*.name, 'adlc:paused')
+    uses: Invoca/ADLC/.github/workflows/adlc-mention.yml@fe59dede3180e9fb890f7a6eacf99c25e7cb27db # v3.16.2
+    secrets: inherit

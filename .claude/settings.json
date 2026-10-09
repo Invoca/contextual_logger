@@ -1,0 +1,110 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/check-worktree-edit.ts"
+          },
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/adlc/methods/hooks/check-adlc-version.ts PreToolUse"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/worktree-destroy-shim.ts"
+          },
+          {
+            "type": "command",
+            "command": "adlc-cli hook prefer"
+          }
+        ]
+      },
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/check-worktree-read.ts"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/adlc/methods/hooks/check-adlc-version.ts SessionStart"
+          },
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/adlc/methods/hooks/check-adlc-cli-floor.ts"
+          },
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/adlc/methods/hooks/wire-commit-msg-hook.ts"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r 'if (.tool_input.command | test(\"(^|[;&|(])[[:space:]]*gh[[:space:]]+pr[[:space:]]+create([[:space:]]|$)\")) then {\"hookSpecificOutput\": {\"hookEventName\": \"PostToolUse\", \"additionalContext\": \"MANDATORY: A PR was just created. Issue work runs through the orchestrator, which owns the review phase and invokes the reviewer automatically. Re-invoke the orchestrator to continue. Do not invoke the reviewer directly.\"}} else empty end'"
+          }
+        ]
+      },
+      {
+        "matcher": "Agent|Task",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/adlc-meter-hook.ts"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/adlc-meter-hook.ts"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/session-fingerprint.ts",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "deny": [
+      "Agent(general-purpose)",
+      "Agent(Explore)",
+      "Agent(Plan)"
+    ],
+    "allow": [
+      "Bash(adlc-cli:*)"
+    ]
+  }
+}

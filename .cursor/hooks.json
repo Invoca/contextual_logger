@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "hooks": {
+    "preToolUse": [
+      { "matcher": "Edit|Write", "command": ".cursor/hooks/check-worktree-edit.ts" },
+      { "matcher": "Edit|Write", "command": ".cursor/hooks/check-adlc-version.ts preToolUse" }
+    ],
+    "sessionStart": [
+      { "command": ".cursor/hooks/check-adlc-version.ts sessionStart" },
+      { "command": ".cursor/hooks/wire-commit-msg-hook.ts" }
+    ],
+    "sessionEnd": [
+      { "command": ".cursor/hooks/session-fingerprint.ts" }
+    ],
+    "stop": [
+      { "command": ".cursor/hooks/session-fingerprint.ts" }
+    ]
+  }
+}

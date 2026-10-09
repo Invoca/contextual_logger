@@ -1,0 +1,134 @@
+# ============================================================================
+# FRAMEWORK-OWNED — DO NOT EDIT.
+#
+# ADLC rewrites this file in full on every bootstrap and every re-run. It
+# documents every ADLC-recognized env var. Copy anything you need from
+# here into your project's own env file. Commit this file so each
+# framework upgrade's new variables arrive as a reviewable diff.
+# ============================================================================
+
+# ADLC Environment Variables
+# Copy any variables you need into your project's .env
+
+# === GITHUB SETUP (Tickets + Pull Requests) ===
+#
+# The ADLC uses the gh CLI for the entire per-ticket state machine — issues,
+# the Projects v2 Status field, and Pull Request mechanics (creating,
+# reviewing, and merging PRs). No MCP server or Docker container is needed.
+#
+# Step 1: Install GitHub CLI
+#   macOS:   brew install gh
+#   Windows: winget install --id GitHub.cli
+#   Linux:   https://cli.github.com/
+#
+# Step 2: Authenticate (preferred)
+#   gh auth login
+#   (Follow the prompts — gh stores credentials securely and every ADLC
+#    workflow uses them automatically. This is the recommended path.)
+#
+# Step 3: Verify
+#   gh auth status
+#   gh project list --owner <OWNER> --limit 1   # only if this repo uses GitHub Projects provisioning
+#
+# `gh project` commands and Projects v2 GraphQL mutations need an additional
+# `project` token scope beyond the standard `repo` scope — see
+# adlc/methods/universal/github-cli-setup.md for the scope gotcha (GitHub's
+# own suggested `gh auth refresh -s read:project` under-grants; use
+# `gh auth refresh -s project` instead). This is an interactive browser flow;
+# it cannot be completed unattended.
+
+# GitHub Token (OPTIONAL — alternative to `gh auth login`)
+# If you prefer not to run `gh auth login`, set a personal access token
+# here instead; the issue/PR workflows read it as a Bearer credential.
+#   Create one at: https://github.com/settings/tokens/new
+#   Required scopes: repo (full repository access), project (Projects v2 —
+#     only if this repo uses GitHub Projects provisioning)
+# Leave blank if you authenticated with `gh auth login`.
+GITHUB_TOKEN=
+
+# === ATLASSIAN SETUP (Epic Layer — Optional) ===
+#
+# Jira is no longer the per-ticket work tracker; the agent state machine
+# (availability gate, claim, status transitions) runs entirely on the GitHub
+# side above. Jira survives only as the optional epic/roadmap layer — human
+# initiative-level status, read by the product agent's bridge and by any
+# agent reading Epic context before writing a spec. Skip this section
+# entirely if this repo doesn't decompose Jira epics into GitHub issues.
+#
+# See adlc/methods/universal/atlassian-access-setup.md for the
+# mechanism-selection and credential setup (Atlassian MCP server, `acli`,
+# or REST API — probed in that order). No environment variable is required
+# here; Atlassian access is probed at runtime per that doc's Selection Order.
+
+# === SLACK SETUP (Demo-Video Posting — Optional) ===
+#
+# When docs/github-routing.yml declares a slack.channel_id, a ticket's demo
+# video is posted to that channel as a native, inline-playing Slack file the
+# moment its PR merges. Skip this section entirely if this repo doesn't post
+# demo videos to Slack.
+#
+# Required scopes: files:write, chat:write.
+#
+# A spec-backed PR's merge additionally posts a structured, customer-facing
+# update (links, an author @mention per commit author, threaded video, and
+# one thread reply per acceptance criterion) instead of the plain video post
+# above. The author-@mention lookup (Slack's users.lookupByEmail) needs one
+# more scope:
+#   users:read.email
+# This is a Rollout Prerequisite for the structured post's @mention feature —
+# required for any @mention to ever resolve. Without it, every author lookup
+# degrades to a plain display name (no @mention); the post still succeeds, so
+# it does not block shipping the rest of this feature, but the scope must be
+# granted for @mentions to work at all.
+#
+# Setup: create a Slack App, install it to the workspace, and invite the bot
+# to the channel named by slack.channel_id so it can post there.
+ADLC_DEMO_AGENT_SLACK_TOKEN=
+
+# Add your project's specific environment variables below
+
+# === TELEMETRY (per-agent / per-session duration and cost) ===
+#
+# ADLC records how long each agent takes and what it costs, to a machine-local
+# store outside every repository ($XDG_STATE_HOME/adlc/telemetry/ or
+# ~/.adlc/telemetry/). Nothing is sent anywhere — no network egress.
+#
+# Enabled by default. To opt out for THIS repo, on THIS machine:
+#   ADLC_TELEMETRY=off
+#
+# Accepted off values: off, 0, false, no, disabled (any case). Anything else, or
+# absent, means on. An ADLC_TELEMETRY exported in your shell wins over this file,
+# so you can disable it everywhere at once from your shell profile.
+#
+# Set it HERE rather than by editing .claude/settings.json — that file is
+# committed, so disabling telemetry there disables it for everyone who pulls, and
+# re-enabling it re-enables it for everyone. This file is gitignored and yours.
+#
+# Read `adlc/methods/telemetry/telemetry-usage-guide.md` for what gets recorded
+# and how to read it.
+#ADLC_TELEMETRY=off
+
+# === INTAKE LABEL (per-operator product screening/triage/hygiene scope) ===
+#
+# Product's screening and triage board queries, and the on-demand board-hygiene
+# fast path, cover the whole board by default. Setting this narrows those runs
+# to `Open` items carrying one label of your choosing, and labels any new
+# issue the product agent files on your behalf (a triage follow-on, or an
+# epic-decomposition child) with the same value.
+#
+# Disabled (whole-board scope) by default. To opt in for THIS repo, on THIS
+# machine:
+#   ADLC_INTAKE_LABEL=team-web
+#
+# Holds exactly one label — never a list. An ADLC_INTAKE_LABEL exported in
+# your shell wins over this file, so you can set it once from your shell
+# profile across every repo.
+#
+# Set it HERE rather than in a committed file — a repo-committed value would
+# apply to everyone who pulls, which defeats the per-operator scoping this
+# exists for. This file is gitignored and yours.
+#
+# Read procedure for any consuming method doc: check the shell environment
+# first; if unset there, grep (never source) this file for the
+# ADLC_INTAKE_LABEL key.
+#ADLC_INTAKE_LABEL=
