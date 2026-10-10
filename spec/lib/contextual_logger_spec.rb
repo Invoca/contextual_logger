@@ -28,6 +28,8 @@ describe ContextualLogger do
   it { is_expected.to respond_to(:current_context) }
   it { is_expected.to respond_to(:current_context_for_thread) } # for backward-compatibility
   it { is_expected.to respond_to(:redact) }
+  it { is_expected.to respond_to(:register_redacted_key) }
+  it { is_expected.to respond_to(:redact_context) }
 
   context 'with logger writing to log_stream' do
     let(:log_stream) { StringIO.new }
@@ -689,6 +691,109 @@ describe ContextualLogger do
         expect_log_line_to_be_written(expected_log_hash.to_json)
         expect(logger.debug("this is a test", service: 'test_service', password: sensitive_data)).to eq(true)
       end
+    end
+  end
+
+  describe 'key-based context redaction (write path)' do
+    describe 'with a string exchanges value' do
+      let(:expected_log_hash) do
+        {
+          severity: 'DEBUG',
+          service: 'test_service',
+          message: 'this is a test',
+          exchanges: '<redacted>',
+          timestamp: Time.now
+        }
+      end
+
+      it 'replaces the exchanges value with <redacted> in real log output' do
+        expect_log_line_to_be_written(expected_log_hash.to_json)
+        expect(logger.debug('this is a test', service: 'test_service', exchanges: 'raw transcript')).to eq(true)
+      end
+    end
+
+    describe 'with a nested-hash exchanges value' do
+      let(:expected_log_hash) do
+        {
+          severity: 'DEBUG',
+          service: 'test_service',
+          message: 'this is a test',
+          exchanges: '<redacted>',
+          timestamp: Time.now
+        }
+      end
+
+      it 'replaces the entire exchanges value with <redacted>, without recursing into it' do
+        expect_log_line_to_be_written(expected_log_hash.to_json)
+        expect(
+          logger.debug('this is a test', service: 'test_service', exchanges: { request: 'req', response: 'resp' })
+        ).to eq(true)
+      end
+    end
+
+    describe 'with an array-of-hashes exchanges value' do
+      let(:expected_log_hash) do
+        {
+          severity: 'DEBUG',
+          service: 'test_service',
+          message: 'this is a test',
+          exchanges: '<redacted>',
+          timestamp: Time.now
+        }
+      end
+
+      it 'replaces the entire array value with <redacted>, mirroring the parent epic acceptance criterion' do
+        expect_log_line_to_be_written(expected_log_hash.to_json)
+        expect(
+          logger.debug('this is a test', service: 'test_service', exchanges: [{ request: 'req 1' }, { response: 'resp 1' }])
+        ).to eq(true)
+      end
+    end
+
+    describe 'with no exchanges key and no other registered key' do
+      let(:expected_log_hash) do
+        {
+          severity: 'DEBUG',
+          service: 'test_service',
+          message: 'this is a test',
+          timestamp: Time.now
+        }
+      end
+
+      it 'does not change output for an ordinary log call (no regression)' do
+        expect_log_line_to_be_written(expected_log_hash.to_json)
+        expect(logger.debug('this is a test', service: 'test_service')).to eq(true)
+      end
+    end
+
+    describe 'alongside value-based secret redaction' do
+      let(:sensitive_data) { 'super_secret_value' }
+      let(:expected_log_hash) do
+        {
+          severity: 'DEBUG',
+          service: 'test_service',
+          message: 'this is a test',
+          password: '<redacted>',
+          exchanges: '<redacted>',
+          timestamp: Time.now
+        }
+      end
+
+      before { logger.register_secret(sensitive_data) }
+
+      it 'masks the registered secret and the default-registered key independently in the same call' do
+        expect_log_line_to_be_written(expected_log_hash.to_json)
+        expect(
+          logger.debug('this is a test', service: 'test_service', password: sensitive_data, exchanges: 'raw transcript')
+        ).to eq(true)
+      end
+    end
+  end
+
+  describe 'register_redacted_key / redact_context delegation' do
+    it 'delegates register_redacted_key and redact_context to the memoized redactor' do
+      logger.register_redacted_key(:custom_field)
+      expect(logger.redact_context(custom_field: 'secret', other: 'kept')).to eq(custom_field: '<redacted>', other: 'kept')
     end
   end
 

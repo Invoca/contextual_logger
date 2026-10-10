@@ -52,7 +52,7 @@ module ContextualLogger
   module LoggerMixin
     include Context
 
-    delegate :register_secret, :register_secret_regex, :redact, to: :redactor
+    delegate :register_secret, :register_secret_regex, :redact, :register_redacted_key, :redact_context, to: :redactor
 
     def global_context
       @global_context ||= Context::EMPTY_CONTEXT
@@ -146,7 +146,7 @@ module ContextualLogger
     def write_entry_to_log(severity, timestamp, progname, message, context:)
       @logdev&.write(
         redactor.redact(
-          format_message(format_severity(severity), timestamp, progname, message, context: context)
+          format_message(format_severity(severity), timestamp, progname, message, context: redactor.redact_context(context))
         )
       )
     end

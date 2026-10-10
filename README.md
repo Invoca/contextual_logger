@@ -155,6 +155,27 @@ The above will produce the resulting log line:
 03/10/20 12:22:05.769 INFO Request sent with body { 'username': 'test_user', 'password': '<redacted>' }
 ```
 
+### Registering a Redacted Context Key
+In addition to the value-based redaction above (which matches patterns in the already-serialized log
+line), you can also register a context **key** whose value should always be redacted, no matter what
+that value looks like, wherever the key appears in a log call's context -- at the top level, nested
+inside other hashes, or nested inside an array of hashes:
+```ruby
+contextual_logger.register_redacted_key(:auth_token)
+
+contextual_logger.info('Request sent', auth_token: 'abc123', response: { auth_token: 'abc123', status: 200 })
+```
+The above will produce the resulting log line:
+```json
+{"message":"Request sent","severity":"INFO","timestamp":"...","auth_token":"<redacted>","response":{"auth_token":"<redacted>","status":200}}
+```
+Note that the entire value of a matched key is replaced with `'<redacted>'` -- it is never partially
+masked or recursed into, even when its value is a `Hash` or an `Array` of hashes.
+
+`exchanges` is registered as a redacted key by default, with no action required from any consuming
+application -- any context passed to a log call under the `exchanges` key (a `String`, a `Hash`, or an
+`Array` of hashes) is masked automatically.
+
 ## Overrides
 ### ActiveSupport::TaggedLogging
 ActiveSupport's `TaggedLogging` extension adds the ability for tags to be prepended onto logs in an easy to use way. This is a very

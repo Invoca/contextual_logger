@@ -4,6 +4,10 @@ Inspired by [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Note: this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2026-10-09
+### Added
+- Added `ContextualLogger::Redactor#register_redacted_key`/`#redact_context` to support key-based context redaction (redacting a context key's entire value, regardless of its shape, at any nesting depth) alongside the existing value-based `register_secret`/`register_secret_regex`/`redact` API. `LoggerMixin` delegates both new methods, and `write_entry_to_log` now runs `redact_context` on every log call's context before it is serialized. `exchanges` is registered as a redacted key by default, with no action required from any consuming application.
+
 ## [1.5.0] - 2025-09-12
 ### Added
 - Added LoggerWithContext support for `debug?`, `info?`, `warn?`, `error?`, `fatal?`.
