@@ -49,9 +49,9 @@ RSpec.describe ContextualLogger::Redactor do
 
   describe '#register_redacted_key' do
     it 'adds the new key to redacted_keys' do
-      expect(subject.redacted_keys).to be_empty
-      subject.register_redacted_key(:exchanges)
-      expect(subject.redacted_keys).to include('exchanges')
+      expect(subject.redacted_keys).to eq(Set.new(described_class::DEFAULT_REDACTED_KEYS))
+      subject.register_redacted_key(:custom_key)
+      expect(subject.redacted_keys).to include('custom_key')
     end
 
     it 'adds the same key only once when registered repeatedly as the same type' do
@@ -76,8 +76,20 @@ RSpec.describe ContextualLogger::Redactor do
   end
 
   describe '#redact_context' do
+    context 'default registration' do
+      it 'registers exchanges by default on a freshly-constructed Redactor' do
+        expect(subject.redacted_keys).to include('exchanges')
+      end
+
+      it 'masks an exchanges value with no prior call to register_redacted_key' do
+        context = { user_id: 1, exchanges: 'raw transcript' }
+        expect(subject.redact_context(context)).to eq(user_id: 1, exchanges: '<redacted>')
+      end
+    end
+
     context 'when no keys are registered' do
       it 'returns the exact same hash object, unchanged' do
+        subject.redacted_keys.clear
         context = { user_id: 1, exchanges: 'raw transcript' }
         expect(subject.redact_context(context)).to equal(context)
       end
@@ -175,7 +187,7 @@ RSpec.describe ContextualLogger::Redactor do
         subject.register_secret('hello')
         subject.register_secret_regex('wor[ld]+')
 
-        expect(subject.redacted_keys).to be_empty
+        expect(subject.redacted_keys).to eq(Set.new(described_class::DEFAULT_REDACTED_KEYS))
         expect(subject.redact_context(hello: 'hello world')).to eq(hello: 'hello world')
       end
     end
