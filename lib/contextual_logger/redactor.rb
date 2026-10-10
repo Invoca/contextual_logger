@@ -4,12 +4,16 @@ module ContextualLogger
   class Redactor
     MASK = '<redacted>'
 
+    # Keys registered as redacted by default, with no action required from any caller.
+    # See spec § 4.3 for why `exchanges` lives here rather than requiring explicit registration.
+    DEFAULT_REDACTED_KEYS = %w[exchanges].freeze
+
     attr_reader :redaction_set, :redaction_regex, :redacted_keys
 
     def initialize
       @redaction_set   = Set.new
       @redaction_regex = nil
-      @redacted_keys   = Set.new
+      @redacted_keys   = Set.new(DEFAULT_REDACTED_KEYS)
     end
 
     def register_secret(sensitive_data)
